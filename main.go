@@ -10,21 +10,11 @@ import (
 	"github.com/fmenozzi/hn/src/formatting"
 )
 
-type ItemMap struct {
-	Items map[api.ItemId]api.Item
-	mutex sync.Mutex
-}
-
-func (im *ItemMap) Add(id api.ItemId, item api.Item) {
-	im.mutex.Lock()
-	im.Items[id] = item
-	im.mutex.Unlock()
-}
-
-func Output(stories *api.Stories, items *ItemMap, styled bool) string {
+func Output(stories *api.Stories, items *sync.Map, styled bool) string {
 	var builder strings.Builder
 	for _, id := range stories.Ids {
-		item := items.Items[id]
+		mapitem, _ := items.Load(id)
+		item := mapitem.(api.Item)
 		switch item.Type {
 		case api.Job:
 			builder.WriteString(formatting.JobOutput(&item, styled))
@@ -64,7 +54,7 @@ func main() {
 		panic(fmt.Sprintf("Error: %s\n", err))
 	}
 
-	items := ItemMap{Items: make(map[api.ItemId]api.Item)}
+	var items sync.Map
 	var wg sync.WaitGroup
 	for _, id := range stories.Ids {
 		wg.Add(1)
@@ -74,7 +64,7 @@ func main() {
 			if err != nil {
 				panic(fmt.Sprintf("Error: %s\n", err))
 			}
-			items.Add(id, *item)
+			items.Store(id, *item)
 		}(id)
 	}
 	wg.Wait()
