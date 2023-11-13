@@ -5,30 +5,33 @@ import (
 	"fmt"
 	"strings"
 	"sync"
+
+	"github.com/fmenozzi/hn/src/api"
+	"github.com/fmenozzi/hn/src/formatting"
 )
 
 type ItemMap struct {
-	Items map[ItemId]Item
+	Items map[api.ItemId]api.Item
 	mutex sync.Mutex
 }
 
-func (im *ItemMap) Add(id ItemId, item Item) {
+func (im *ItemMap) Add(id api.ItemId, item api.Item) {
 	im.mutex.Lock()
 	im.Items[id] = item
 	im.mutex.Unlock()
 }
 
-func Output(stories *Stories, items *ItemMap, styled bool) string {
+func Output(stories *api.Stories, items *ItemMap, styled bool) string {
 	var builder strings.Builder
 	for _, id := range stories.Ids {
 		item := items.Items[id]
 		switch item.Type {
-		case Job:
-			builder.WriteString(JobOutput(&item, styled))
-		case Story:
-			builder.WriteString(StoryOutput(&item, styled))
-		case Poll:
-			builder.WriteString(PollOutput(&item, styled))
+		case api.Job:
+			builder.WriteString(formatting.JobOutput(&item, styled))
+		case api.Story:
+			builder.WriteString(formatting.StoryOutput(&item, styled))
+		case api.Poll:
+			builder.WriteString(formatting.PollOutput(&item, styled))
 		}
 	}
 	return builder.String()
@@ -43,29 +46,29 @@ func main() {
 	flag.StringVar(&rankingstr, "r", "top", "Ranking method (one of `top`, `best`, `new`)")
 	flag.Parse()
 
-	var ranking StoriesRanking
+	var ranking api.StoriesRanking
 	switch rankingstr {
 	case "top":
-		ranking = Top
+		ranking = api.Top
 	case "best":
-		ranking = Best
+		ranking = api.Best
 	case "new":
-		ranking = New
+		ranking = api.New
 	default:
 		panic(fmt.Sprintf("invalid ranking option: %s", rankingstr))
 	}
 
-	client := MakeClient()
+	client := api.MakeClient()
 	stories, err := client.FetchStories(ranking, limit)
 	if err != nil {
 		panic(fmt.Sprintf("Error: %s\n", err))
 	}
 
-	items := ItemMap{Items: make(map[ItemId]Item)}
+	items := ItemMap{Items: make(map[api.ItemId]api.Item)}
 	var wg sync.WaitGroup
 	for _, id := range stories.Ids {
 		wg.Add(1)
-		go func(id ItemId) {
+		go func(id api.ItemId) {
 			defer wg.Done()
 			item, err := client.FetchItem(id)
 			if err != nil {

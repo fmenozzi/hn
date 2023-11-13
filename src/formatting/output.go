@@ -1,10 +1,14 @@
-package main
+package formatting
 
-import "fmt"
+import (
+	"fmt"
+
+	"github.com/fmenozzi/hn/src/api"
+)
 
 const itemBaseUrl = "https://news.ycombinator.com/item?id="
 
-func JobOutput(job *Item, styled bool) string {
+func JobOutput(job *api.Item, styled bool) string {
 	score := *job.Score
 	postUrl := fmt.Sprintf("%s%d", itemBaseUrl, job.Id)
 	title := *job.Title
@@ -16,7 +20,7 @@ func JobOutput(job *Item, styled bool) string {
 	}
 }
 
-func StoryOutput(story *Item, styled bool) string {
+func StoryOutput(story *api.Item, styled bool) string {
 	score := *story.Score
 	comments := *story.Descendants
 	postUrl := fmt.Sprintf("%s%d", itemBaseUrl, story.Id)
@@ -34,7 +38,7 @@ func StoryOutput(story *Item, styled bool) string {
 	}
 }
 
-func PollOutput(poll *Item, styled bool) string {
+func PollOutput(poll *api.Item, styled bool) string {
 	score := *poll.Score
 	comments := *poll.Descendants
 	postUrl := fmt.Sprintf("%s%d", itemBaseUrl, poll.Id)
