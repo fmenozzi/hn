@@ -22,10 +22,11 @@ func MakeClient() HnClient {
 	}
 }
 
-func (hn *HnClient) FetchStories(ranking StoriesRanking, limit int) (*Stories, error) {
+func (hn *HnClient) FetchRankedStoriesIds(ranking StoriesRanking, limit int) ([]ItemId, error) {
 	if limit < 0 || limit > maxStoriesLimit {
 		return nil, fmt.Errorf("Invalid limit: %d\n", limit)
 	}
+
 	var endpoint string
 	switch ranking {
 	case Top:
@@ -47,14 +48,13 @@ func (hn *HnClient) FetchStories(ranking StoriesRanking, limit int) (*Stories, e
 	if err != nil {
 		return nil, err
 	}
+
 	var ids []ItemId
 	if err := json.Unmarshal(body, &ids); err != nil {
 		return nil, fmt.Errorf("Failed to parse json body: %s\n", err)
 	}
-	return &Stories{
-		Ids:     ids[:limit],
-		Ranking: ranking,
-	}, nil
+
+	return ids[:limit], nil
 }
 
 func (hn *HnClient) FetchItem(id ItemId) (*Item, error) {
@@ -67,9 +67,11 @@ func (hn *HnClient) FetchItem(id ItemId) (*Item, error) {
 	if err != nil {
 		return nil, err
 	}
+
 	var item Item
 	if err := json.Unmarshal(body, &item); err != nil {
 		return nil, err
 	}
+
 	return &item, nil
 }

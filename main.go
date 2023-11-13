@@ -1,20 +1,53 @@
 package main
 
 import (
-	"flag"
 	"fmt"
 	"strings"
 	"sync"
 
 	"github.com/fmenozzi/hn/src/api"
+	"github.com/fmenozzi/hn/src/cli"
 	"github.com/fmenozzi/hn/src/formatting"
 )
 
-func Output(stories *api.Stories, items *sync.Map, styled bool) string {
-	var builder strings.Builder
-	for _, id := range stories.Ids {
-		mapitem, _ := items.Load(id)
+func FetchFrontPageItems(args cli.Args) []api.Item {
+	client := api.MakeClient()
+	rankedStoriesIds, err := client.FetchRankedStoriesIds(args.Ranking, args.Limit)
+	if err != nil {
+		panic(fmt.Sprintf("Error: %s\n", err))
+	}
+
+	var itemsMap sync.Map
+	var wg sync.WaitGroup
+	for _, id := range rankedStoriesIds {
+		wg.Add(1)
+		go func(id api.ItemId) {
+			defer wg.Done()
+			item, err := client.FetchItem(id)
+			if err != nil {
+				panic(fmt.Sprintf("Error: %s\n", err))
+			}
+			itemsMap.Store(id, *item)
+		}(id)
+	}
+	wg.Wait()
+
+	rankedItems := make([]api.Item, len(rankedStoriesIds))
+	for _, id := range rankedStoriesIds {
+		mapitem, ok := itemsMap.Load(id)
+		if !ok {
+			panic(fmt.Sprintf("no item %d in items map", id))
+		}
 		item := mapitem.(api.Item)
+		rankedItems = append(rankedItems, item)
+	}
+
+	return rankedItems
+}
+
+func DisplayItems(items []api.Item, styled bool) {
+	var builder strings.Builder
+	for _, item := range items {
 		switch item.Type {
 		case api.Job:
 			builder.WriteString(formatting.JobOutput(&item, styled))
@@ -24,50 +57,14 @@ func Output(stories *api.Stories, items *sync.Map, styled bool) string {
 			builder.WriteString(formatting.PollOutput(&item, styled))
 		}
 	}
-	return builder.String()
+	fmt.Print(builder.String())
 }
 
 func main() {
-	var limit int
-	var styled bool
-	var rankingstr string
-	flag.IntVar(&limit, "l", 30, "Number of stories to fetch")
-	flag.BoolVar(&styled, "s", false, "Whether to style output for mdcat")
-	flag.StringVar(&rankingstr, "r", "top", "Ranking method (one of `top`, `best`, `new`)")
-	flag.Parse()
-
-	var ranking api.StoriesRanking
-	switch rankingstr {
-	case "top":
-		ranking = api.Top
-	case "best":
-		ranking = api.Best
-	case "new":
-		ranking = api.New
-	default:
-		panic(fmt.Sprintf("invalid ranking option: %s", rankingstr))
-	}
-
-	client := api.MakeClient()
-	stories, err := client.FetchStories(ranking, limit)
+	args, err := cli.ArgsFromCli()
 	if err != nil {
-		panic(fmt.Sprintf("Error: %s\n", err))
+		fmt.Printf("error: %s\n", err.Error())
 	}
 
-	var items sync.Map
-	var wg sync.WaitGroup
-	for _, id := range stories.Ids {
-		wg.Add(1)
-		go func(id api.ItemId) {
-			defer wg.Done()
-			item, err := client.FetchItem(id)
-			if err != nil {
-				panic(fmt.Sprintf("Error: %s\n", err))
-			}
-			items.Store(id, *item)
-		}(id)
-	}
-	wg.Wait()
-
-	fmt.Print(Output(stories, &items, styled))
+	DisplayItems(FetchFrontPageItems(args), args.Styled)
 }
