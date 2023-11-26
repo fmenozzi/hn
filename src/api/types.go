@@ -1,7 +1,6 @@
 package api
 
 type ItemId = int32
-
 type ItemType string
 
 const (
@@ -59,15 +58,30 @@ type Item struct {
 	Descendants *int32 `json:"descendants"`
 }
 
-type StoriesRanking int
+type FrontPageItemsRanking int
 
 const (
-	Top StoriesRanking = iota
+	Top FrontPageItemsRanking = iota
 	Best
 	New
 )
 
-type Stories struct {
+func (r FrontPageItemsRanking) ToPointer() *FrontPageItemsRanking {
+	return &r
+}
+
+type SearchItemsRanking int
+
+const (
+	Date SearchItemsRanking = iota
+	Popularity
+)
+
+func (r SearchItemsRanking) ToPointer() *SearchItemsRanking {
+	return &r
+}
+
+type FrontPageItems struct {
 	Ids     []ItemId
-	Ranking StoriesRanking
+	Ranking FrontPageItemsRanking
 }

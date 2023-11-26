@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"os"
 	"strings"
 	"sync"
 
@@ -10,9 +11,9 @@ import (
 	"github.com/fmenozzi/hn/src/formatting"
 )
 
-func FetchFrontPageItems(args cli.Args) []api.Item {
+func FetchFrontPageItems(ranking api.FrontPageItemsRanking, limit int) []api.Item {
 	client := api.MakeClient()
-	rankedStoriesIds, err := client.FetchRankedStoriesIds(args.Ranking, args.Limit)
+	rankedStoriesIds, err := client.FetchRankedStoriesIds(ranking, limit)
 	if err != nil {
 		panic(fmt.Sprintf("Error: %s\n", err))
 	}
@@ -64,7 +65,26 @@ func main() {
 	args, err := cli.ArgsFromCli()
 	if err != nil {
 		fmt.Printf("error: %s\n", err.Error())
+		os.Exit(1)
 	}
 
-	DisplayItems(FetchFrontPageItems(args), args.Styled)
+	if args.Version {
+		fmt.Println(cli.Version)
+		os.Exit(0)
+	}
+
+	if len(args.Query) != 0 {
+		if args.RankingSearchResults == nil {
+			fmt.Printf("error: invalid search result ranking: %v\n", args.RankingRawString)
+			os.Exit(1)
+		}
+		fmt.Println("error: search is unimplemented")
+		os.Exit(1)
+	} else {
+		if args.RankingFrontPage == nil {
+			fmt.Printf("error: invalid front page ranking: %v\n", args.RankingRawString)
+			os.Exit(1)
+		}
+		DisplayItems(FetchFrontPageItems(*args.RankingFrontPage, args.Limit), args.Styled)
+	}
 }

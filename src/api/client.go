@@ -28,7 +28,7 @@ func MakeClientForUrl(url string) HnClient {
 	}
 }
 
-func (hn *HnClient) FetchRankedStoriesIds(ranking StoriesRanking, limit int) ([]ItemId, error) {
+func (hn *HnClient) FetchRankedStoriesIds(ranking FrontPageItemsRanking, limit int) ([]ItemId, error) {
 	if limit < 0 || limit > MaxStoriesLimit {
 		return nil, fmt.Errorf("Invalid limit: %d\n", limit)
 	}
