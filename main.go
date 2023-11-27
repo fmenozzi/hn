@@ -12,11 +12,11 @@ import (
 
 func FetchFrontPageItems(ranking api.FrontPageItemsRanking, limit int) []api.Item {
 	client := api.MakeProdClient()
-	rankedStoriesIds, err := client.FetchRankedStoriesIds(ranking, limit)
+	frontPageItemIds, err := client.FetchFrontPageItemIds(ranking, limit)
 	if err != nil {
 		panic(fmt.Sprintf("error: %s\n", err))
 	}
-	frontPageItems, err := client.FetchItems(rankedStoriesIds)
+	frontPageItems, err := client.FetchItems(frontPageItemIds)
 	if err != nil {
 		panic(fmt.Sprintf("error: %s\n", err))
 	}
@@ -25,11 +25,11 @@ func FetchFrontPageItems(ranking api.FrontPageItemsRanking, limit int) []api.Ite
 
 func FetchSearchItems(request api.SearchRequest) []api.Item {
 	client := api.MakeProdClient()
-	searchResponse, err := client.Search(request)
+	searchItemIds, err := client.Search(request)
 	if err != nil {
 		panic(fmt.Sprintf("error: %s\n", err))
 	}
-	searchItems, err := client.FetchItems(searchResponse.Ids)
+	searchItems, err := client.FetchItems(searchItemIds)
 	if err != nil {
 		panic(fmt.Sprintf("error: %s\n", err))
 	}

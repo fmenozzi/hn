@@ -1,6 +1,7 @@
 package api
 
 type ItemId = int32
+
 type ItemType string
 
 const (
@@ -81,11 +82,6 @@ func (r SearchItemsRanking) ToPointer() *SearchItemsRanking {
 	return &r
 }
 
-type FrontPageItems struct {
-	Ids     []ItemId
-	Ranking FrontPageItemsRanking
-}
-
 type SearchRequest struct {
 	Query   string
 	Tags    []string
@@ -99,9 +95,4 @@ type SearchResultJson struct {
 
 type SearchResponseJson struct {
 	Hits []SearchResultJson `json:"hits"`
-}
-
-type SearchItems struct {
-	Ids     []ItemId
-	Ranking SearchItemsRanking
 }

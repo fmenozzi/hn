@@ -66,7 +66,7 @@ func MakeProdClient() HnClient {
 		Build()
 }
 
-func (hn *HnClient) FetchRankedStoriesIds(ranking FrontPageItemsRanking, limit int) ([]ItemId, error) {
+func (hn *HnClient) FetchFrontPageItemIds(ranking FrontPageItemsRanking, limit int) ([]ItemId, error) {
 	if limit < 0 || limit > MaxStoriesLimit {
 		return nil, fmt.Errorf("Invalid limit: %d\n", limit)
 	}
@@ -163,7 +163,7 @@ func (hn *HnClient) FetchItems(ids []ItemId) ([]Item, error) {
 	return items, nil
 }
 
-func (hn *HnClient) Search(request SearchRequest) (*SearchItems, error) {
+func (hn *HnClient) Search(request SearchRequest) ([]ItemId, error) {
 	if request.Limit < 0 || request.Limit > MaxStoriesLimit {
 		return nil, fmt.Errorf("Invalid limit: %d\n", request.Limit)
 	}
@@ -206,9 +206,5 @@ func (hn *HnClient) Search(request SearchRequest) (*SearchItems, error) {
 	for i, hit := range hits {
 		ids[i] = hit.StoryId
 	}
-
-	return &SearchItems{
-		Ids:     ids,
-		Ranking: request.Ranking,
-	}, nil
+	return ids, nil
 }

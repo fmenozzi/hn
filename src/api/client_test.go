@@ -33,70 +33,70 @@ func WithFailedResponse(status int) http.HandlerFunc {
 	})
 }
 
-func TestFetchRankedStoriesIdsSucceedsIfServerReturns200(t *testing.T) {
+func TestFetchFrontPageItemIdsSucceedsIfServerReturns200(t *testing.T) {
 	server := httptest.NewServer(WithJsonResponse("[123, 456, 789]"))
 	defer server.Close()
 	client := NewHnClientBuilder().SetHnUrl(server.URL).Build()
 
-	rankedStoriesIds, err := client.FetchRankedStoriesIds(Top, 10)
+	ids, err := client.FetchFrontPageItemIds(Top, 10)
 
 	assert.Nil(t, err)
-	assert.Equal(t, rankedStoriesIds, []ItemId{123, 456, 789})
+	assert.Equal(t, ids, []ItemId{123, 456, 789})
 }
 
-func TestFetchRankedStoriesIdsSucceedsWithLimitOfZero(t *testing.T) {
+func TestFetchFrontPageItemIdsSucceedsWithLimitOfZero(t *testing.T) {
 	server := httptest.NewServer(WithJsonResponse("[123, 456, 789]"))
 	defer server.Close()
 	client := NewHnClientBuilder().SetHnUrl(server.URL).Build()
 
-	rankedStoriesIds, err := client.FetchRankedStoriesIds(Top, 0)
+	ids, err := client.FetchFrontPageItemIds(Top, 0)
 
 	assert.Nil(t, err)
-	assert.Empty(t, rankedStoriesIds)
+	assert.Empty(t, ids)
 }
 
-func TestFetchRankedStoriesIdsSucceedsWithLimitLessThanResponseSize(t *testing.T) {
+func TestFetchFrontPageItemIdsSucceedsWithLimitLessThanResponseSize(t *testing.T) {
 	server := httptest.NewServer(WithJsonResponse("[123, 456, 789]"))
 	defer server.Close()
 	client := NewHnClientBuilder().SetHnUrl(server.URL).Build()
 
-	rankedStoriesIds, err := client.FetchRankedStoriesIds(Top, 1)
+	ids, err := client.FetchFrontPageItemIds(Top, 1)
 
 	assert.Nil(t, err)
-	assert.Equal(t, rankedStoriesIds, []ItemId{123})
+	assert.Equal(t, ids, []ItemId{123})
 }
 
-func TestFetchRankedStoriesIdsFailsWithInvalidLimits(t *testing.T) {
+func TestFetchFrontPageItemIdsFailsWithInvalidLimits(t *testing.T) {
 	server := httptest.NewServer(WithJsonResponse("[]")) // unimportant
 	defer server.Close()
 	client := NewHnClientBuilder().SetHnUrl(server.URL).Build()
 
-	_, err := client.FetchRankedStoriesIds(Top, -1)
+	_, err := client.FetchFrontPageItemIds(Top, -1)
 	assert.NotNil(t, err)
 	assert.ErrorContains(t, err, "Invalid limit")
 
-	_, err = client.FetchRankedStoriesIds(Top, MaxStoriesLimit+1)
+	_, err = client.FetchFrontPageItemIds(Top, MaxStoriesLimit+1)
 	assert.NotNil(t, err)
 	assert.ErrorContains(t, err, "Invalid limit")
 }
 
-func TestFetchRankedStoriesIdsFailsIfServerReturns500(t *testing.T) {
+func TestFetchFrontPageItemIdsFailsIfServerReturns500(t *testing.T) {
 	server := httptest.NewServer(WithFailedResponse(http.StatusInternalServerError))
 	defer server.Close()
 	client := NewHnClientBuilder().SetHnUrl(server.URL).Build()
 
-	_, err := client.FetchRankedStoriesIds(Top, 10)
+	_, err := client.FetchFrontPageItemIds(Top, 10)
 
 	assert.NotNil(t, err)
 	assert.ErrorContains(t, err, "500") // internal server error
 }
 
-func TestFetchRankedStoriesIdsFailsIfJsonCannotBeParsed(t *testing.T) {
+func TestFetchFrontPageItemIdsFailsIfJsonCannotBeParsed(t *testing.T) {
 	server := httptest.NewServer(WithJsonResponse("["))
 	defer server.Close()
 	client := NewHnClientBuilder().SetHnUrl(server.URL).Build()
 
-	_, err := client.FetchRankedStoriesIds(Top, 10)
+	_, err := client.FetchFrontPageItemIds(Top, 10)
 
 	assert.NotNil(t, err)
 	assert.ErrorContains(t, err, "unexpected end of JSON input")
@@ -220,10 +220,7 @@ func TestSearchSucceedsIfServerReturns200(t *testing.T) {
 	})
 
 	assert.Nil(t, err)
-	assert.Equal(t, &SearchItems{
-		Ids:     []ItemId{123, 456, 789},
-		Ranking: Popularity,
-	}, items)
+	assert.Equal(t, []ItemId{123, 456, 789}, items)
 }
 
 func TestSearchSucceedsWhenSortingByDate(t *testing.T) {
@@ -247,10 +244,7 @@ func TestSearchSucceedsWhenSortingByDate(t *testing.T) {
 	})
 
 	assert.Nil(t, err)
-	assert.Equal(t, &SearchItems{
-		Ids:     []ItemId{123, 456, 789},
-		Ranking: Date,
-	}, items)
+	assert.Equal(t, []ItemId{123, 456, 789}, items)
 }
 
 func TestSearchSucceedsWithMultiWordQuery(t *testing.T) {
@@ -274,10 +268,7 @@ func TestSearchSucceedsWithMultiWordQuery(t *testing.T) {
 	})
 
 	assert.Nil(t, err)
-	assert.Equal(t, &SearchItems{
-		Ids:     []ItemId{123, 456, 789},
-		Ranking: Popularity,
-	}, items)
+	assert.Equal(t, []ItemId{123, 456, 789}, items)
 }
 
 func TestSearchSucceedsWithALimitOfZero(t *testing.T) {
@@ -301,10 +292,7 @@ func TestSearchSucceedsWithALimitOfZero(t *testing.T) {
 	})
 
 	assert.Nil(t, err)
-	assert.Equal(t, &SearchItems{
-		Ids:     []ItemId{},
-		Ranking: Popularity,
-	}, items)
+	assert.Empty(t, items)
 }
 
 func TestSearchSucceedsWithALimitLessThanResponseSize(t *testing.T) {
@@ -328,10 +316,7 @@ func TestSearchSucceedsWithALimitLessThanResponseSize(t *testing.T) {
 	})
 
 	assert.Nil(t, err)
-	assert.Equal(t, &SearchItems{
-		Ids:     []ItemId{123},
-		Ranking: Popularity,
-	}, items)
+	assert.Equal(t, []ItemId{123}, items)
 }
 
 func TestSearchFailsWhenServerReturns500(t *testing.T) {
