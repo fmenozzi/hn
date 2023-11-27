@@ -85,3 +85,23 @@ type FrontPageItems struct {
 	Ids     []ItemId
 	Ranking FrontPageItemsRanking
 }
+
+type SearchRequest struct {
+	Query   string
+	Tags    []string
+	Ranking SearchItemsRanking
+	Limit   int
+}
+
+type SearchResultJson struct {
+	StoryId ItemId `json:"story_id"`
+}
+
+type SearchResponseJson struct {
+	Hits []SearchResultJson `json:"hits"`
+}
+
+type SearchItems struct {
+	Ids     []ItemId
+	Ranking SearchItemsRanking
+}

@@ -15,6 +15,18 @@ func WithJsonResponse(json string) http.HandlerFunc {
 	})
 }
 
+func WithMultipleJsonResponses(responses map[string]string) *http.ServeMux {
+	mux := http.NewServeMux()
+	for path, json := range responses {
+		json := json
+		path := path
+		mux.HandleFunc(path, func(w http.ResponseWriter, r *http.Request) {
+			fmt.Fprintln(w, json)
+		})
+	}
+	return mux
+}
+
 func WithFailedResponse(status int) http.HandlerFunc {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(status)
@@ -24,7 +36,7 @@ func WithFailedResponse(status int) http.HandlerFunc {
 func TestFetchRankedStoriesIdsSucceedsIfServerReturns200(t *testing.T) {
 	server := httptest.NewServer(WithJsonResponse("[123, 456, 789]"))
 	defer server.Close()
-	client := MakeClientForUrl(server.URL)
+	client := NewHnClientBuilder().SetHnUrl(server.URL).Build()
 
 	rankedStoriesIds, err := client.FetchRankedStoriesIds(Top, 10)
 
@@ -35,7 +47,7 @@ func TestFetchRankedStoriesIdsSucceedsIfServerReturns200(t *testing.T) {
 func TestFetchRankedStoriesIdsSucceedsWithLimitOfZero(t *testing.T) {
 	server := httptest.NewServer(WithJsonResponse("[123, 456, 789]"))
 	defer server.Close()
-	client := MakeClientForUrl(server.URL)
+	client := NewHnClientBuilder().SetHnUrl(server.URL).Build()
 
 	rankedStoriesIds, err := client.FetchRankedStoriesIds(Top, 0)
 
@@ -46,7 +58,7 @@ func TestFetchRankedStoriesIdsSucceedsWithLimitOfZero(t *testing.T) {
 func TestFetchRankedStoriesIdsFailsWithInvalidLimits(t *testing.T) {
 	server := httptest.NewServer(WithJsonResponse("[]")) // unimportant
 	defer server.Close()
-	client := MakeClientForUrl(server.URL)
+	client := NewHnClientBuilder().SetHnUrl(server.URL).Build()
 
 	_, err := client.FetchRankedStoriesIds(Top, -1)
 	assert.NotNil(t, err)
@@ -60,7 +72,7 @@ func TestFetchRankedStoriesIdsFailsWithInvalidLimits(t *testing.T) {
 func TestFetchRankedStoriesIdsFailsIfServerReturns500(t *testing.T) {
 	server := httptest.NewServer(WithFailedResponse(http.StatusInternalServerError))
 	defer server.Close()
-	client := MakeClientForUrl(server.URL)
+	client := NewHnClientBuilder().SetHnUrl(server.URL).Build()
 
 	_, err := client.FetchRankedStoriesIds(Top, 10)
 
@@ -71,7 +83,7 @@ func TestFetchRankedStoriesIdsFailsIfServerReturns500(t *testing.T) {
 func TestFetchRankedStoriesIdsFailsIfJsonCannotBeParsed(t *testing.T) {
 	server := httptest.NewServer(WithJsonResponse("["))
 	defer server.Close()
-	client := MakeClientForUrl(server.URL)
+	client := NewHnClientBuilder().SetHnUrl(server.URL).Build()
 
 	_, err := client.FetchRankedStoriesIds(Top, 10)
 
@@ -89,7 +101,7 @@ func TestFetchItemSucceedsIfServerReturns200(t *testing.T) {
 	}
 	`))
 	defer server.Close()
-	client := MakeClientForUrl(server.URL)
+	client := NewHnClientBuilder().SetHnUrl(server.URL).Build()
 
 	item, err := client.FetchItem(123)
 
@@ -107,7 +119,7 @@ func TestFetchItemSucceedsIfServerReturns200(t *testing.T) {
 func TestFetchItemFailsIfServerReturns500(t *testing.T) {
 	server := httptest.NewServer(WithFailedResponse(http.StatusInternalServerError))
 	defer server.Close()
-	client := MakeClientForUrl(server.URL)
+	client := NewHnClientBuilder().SetHnUrl(server.URL).Build()
 
 	_, err := client.FetchItem(123)
 
@@ -118,9 +130,186 @@ func TestFetchItemFailsIfServerReturns500(t *testing.T) {
 func TestFetchItemFailsIfJsonCannotBeParsed(t *testing.T) {
 	server := httptest.NewServer(WithJsonResponse("{"))
 	defer server.Close()
-	client := MakeClientForUrl(server.URL)
+	client := NewHnClientBuilder().SetHnUrl(server.URL).Build()
 
 	_, err := client.FetchItem(123)
+
+	assert.NotNil(t, err)
+	assert.ErrorContains(t, err, "unexpected end of JSON input")
+}
+
+func TestFetchItemsSucceedsIfServerReturns200(t *testing.T) {
+	server := httptest.NewServer(WithMultipleJsonResponses(map[string]string{
+		"/item/123.json": `{ "id": 123, "type": "story" }`,
+		"/item/456.json": `{ "id": 456, "type": "job" }`,
+		"/item/789.json": `{ "id": 789, "type": "poll" }`,
+	}))
+	defer server.Close()
+	client := NewHnClientBuilder().SetHnUrl(server.URL).Build()
+
+	items, err := client.FetchItems([]ItemId{123, 456, 789})
+
+	assert.Nil(t, err)
+	assert.Equal(t, items, []Item{
+		{
+			Id:   123,
+			Type: Story,
+		},
+		{
+			Id:   456,
+			Type: Job,
+		},
+		{
+			Id:   789,
+			Type: Poll,
+		},
+	})
+}
+
+func TestFetchItemsFailsIfServerReturns500(t *testing.T) {
+	server := httptest.NewServer(WithFailedResponse(http.StatusInternalServerError))
+	defer server.Close()
+	client := NewHnClientBuilder().SetHnUrl(server.URL).Build()
+
+	_, err := client.FetchItems([]ItemId{123})
+
+	assert.NotNil(t, err)
+	assert.ErrorContains(t, err, "500") // internal server error
+}
+
+func TestFetchItemsFailsIfJsonCannotBeParsed(t *testing.T) {
+	server := httptest.NewServer(WithJsonResponse("{"))
+	defer server.Close()
+	client := NewHnClientBuilder().SetHnUrl(server.URL).Build()
+
+	_, err := client.FetchItems([]ItemId{123})
+
+	assert.NotNil(t, err)
+	assert.ErrorContains(t, err, "unexpected end of JSON input")
+}
+
+func TestSearchSucceedsIfServerReturns200(t *testing.T) {
+	server := httptest.NewServer(WithJsonResponse(`
+	{
+		"hits": [
+			{ "story_id": 123 },
+			{ "story_id": 456 },
+			{ "story_id": 789 }
+		]
+	}
+	`))
+	defer server.Close()
+	client := NewHnClientBuilder().SetSearchPopularityUrl(server.URL).Build()
+
+	items, err := client.Search(SearchRequest{
+		Query:   "query", // unimportant
+		Tags:    []string{"story"},
+		Ranking: Popularity,
+		Limit:   30,
+	})
+
+	assert.Nil(t, err)
+	assert.Equal(t, &SearchItems{
+		Ids:     []ItemId{123, 456, 789},
+		Ranking: Popularity,
+	}, items)
+}
+
+func TestSearchSucceedsWhenSortingByDate(t *testing.T) {
+	server := httptest.NewServer(WithJsonResponse(`
+	{
+		"hits": [
+			{ "story_id": 123 },
+			{ "story_id": 456 },
+			{ "story_id": 789 }
+		]
+	}
+	`))
+	defer server.Close()
+	client := NewHnClientBuilder().SetSearchDateUrl(server.URL).Build()
+
+	items, err := client.Search(SearchRequest{
+		Query:   "query", // unimportant
+		Tags:    []string{"story"},
+		Ranking: Date,
+		Limit:   30,
+	})
+
+	assert.Nil(t, err)
+	assert.Equal(t, &SearchItems{
+		Ids:     []ItemId{123, 456, 789},
+		Ranking: Date,
+	}, items)
+}
+
+func TestSearchSucceedsWithALimitOfZero(t *testing.T) {
+	server := httptest.NewServer(WithJsonResponse(`
+	{
+		"hits": [
+			{ "story_id": 123 },
+			{ "story_id": 456 },
+			{ "story_id": 789 }
+		]
+	}
+	`))
+	defer server.Close()
+	client := NewHnClientBuilder().SetSearchPopularityUrl(server.URL).Build()
+
+	items, err := client.Search(SearchRequest{
+		Query:   "query", // unimportant
+		Tags:    []string{"story"},
+		Ranking: Popularity,
+		Limit:   0,
+	})
+
+	assert.Nil(t, err)
+	assert.Equal(t, &SearchItems{
+		Ids:     []ItemId{},
+		Ranking: Popularity,
+	}, items)
+}
+
+func TestSearchFailsWhenServerReturns500(t *testing.T) {
+	server := httptest.NewServer(WithFailedResponse(http.StatusInternalServerError))
+	defer server.Close()
+	client := NewHnClientBuilder().SetSearchPopularityUrl(server.URL).Build()
+
+	_, err := client.Search(SearchRequest{
+		Query:   "query", // unimportant
+		Tags:    []string{"story"},
+		Ranking: Popularity,
+		Limit:   30,
+	})
+
+	assert.NotNil(t, err)
+	assert.ErrorContains(t, err, "500") // internal server error
+}
+
+func TestSearchFailsWithInvalidLimits(t *testing.T) {
+	server := httptest.NewServer(WithJsonResponse("[]")) // unimportant
+	defer server.Close()
+	client := NewHnClientBuilder().SetSearchPopularityUrl(server.URL).Build()
+
+	_, err := client.Search(SearchRequest{Limit: -1})
+	assert.NotNil(t, err)
+	assert.ErrorContains(t, err, "Invalid limit")
+
+	_, err = client.Search(SearchRequest{Limit: MaxStoriesLimit + 1})
+	assert.NotNil(t, err)
+	assert.ErrorContains(t, err, "Invalid limit")
+}
+
+func TestSearchFailsIfJsonCannotBeParsed(t *testing.T) {
+	server := httptest.NewServer(WithJsonResponse("["))
+	defer server.Close()
+	client := NewHnClientBuilder().SetSearchPopularityUrl(server.URL).Build()
+
+	_, err := client.Search(SearchRequest{
+		Query:   "query", // unimportant
+		Tags:    []string{"story"},
+		Ranking: Popularity,
+		Limit:   30,
+	})
 
 	assert.NotNil(t, err)
 	assert.ErrorContains(t, err, "unexpected end of JSON input")

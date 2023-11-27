@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"os"
 	"strings"
-	"sync"
 
 	"github.com/fmenozzi/hn/src/api"
 	"github.com/fmenozzi/hn/src/cli"
@@ -12,38 +11,29 @@ import (
 )
 
 func FetchFrontPageItems(ranking api.FrontPageItemsRanking, limit int) []api.Item {
-	client := api.MakeClient()
+	client := api.MakeProdClient()
 	rankedStoriesIds, err := client.FetchRankedStoriesIds(ranking, limit)
 	if err != nil {
-		panic(fmt.Sprintf("Error: %s\n", err))
+		panic(fmt.Sprintf("error: %s\n", err))
 	}
-
-	var itemsMap sync.Map
-	var wg sync.WaitGroup
-	for _, id := range rankedStoriesIds {
-		wg.Add(1)
-		go func(id api.ItemId) {
-			defer wg.Done()
-			item, err := client.FetchItem(id)
-			if err != nil {
-				panic(fmt.Sprintf("Error: %s\n", err))
-			}
-			itemsMap.Store(id, *item)
-		}(id)
+	frontPageItems, err := client.FetchItems(rankedStoriesIds)
+	if err != nil {
+		panic(fmt.Sprintf("error: %s\n", err))
 	}
-	wg.Wait()
+	return frontPageItems
+}
 
-	rankedItems := make([]api.Item, len(rankedStoriesIds))
-	for _, id := range rankedStoriesIds {
-		mapitem, ok := itemsMap.Load(id)
-		if !ok {
-			panic(fmt.Sprintf("no item %d in items map", id))
-		}
-		item := mapitem.(api.Item)
-		rankedItems = append(rankedItems, item)
+func FetchSearchItems(request api.SearchRequest) []api.Item {
+	client := api.MakeProdClient()
+	searchResponse, err := client.Search(request)
+	if err != nil {
+		panic(fmt.Sprintf("error: %s\n", err))
 	}
-
-	return rankedItems
+	searchItems, err := client.FetchItems(searchResponse.Ids)
+	if err != nil {
+		panic(fmt.Sprintf("error: %s\n", err))
+	}
+	return searchItems
 }
 
 func DisplayItems(items []api.Item, styled bool) {
@@ -78,8 +68,13 @@ func main() {
 			fmt.Printf("error: invalid search result ranking: %v\n", args.RankingRawString)
 			os.Exit(1)
 		}
-		fmt.Println("error: search is unimplemented")
-		os.Exit(1)
+		request := api.SearchRequest{
+			Query:   args.Query,
+			Tags:    []string{"story"},
+			Ranking: *args.RankingSearchResults,
+			Limit:   args.Limit,
+		}
+		DisplayItems(FetchSearchItems(request), args.Styled)
 	} else {
 		if args.RankingFrontPage == nil {
 			fmt.Printf("error: invalid front page ranking: %v\n", args.RankingRawString)
