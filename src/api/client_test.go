@@ -242,6 +242,33 @@ func TestSearchSucceedsWhenSortingByDate(t *testing.T) {
 	}, items)
 }
 
+func TestSearchSucceedsWithMultiWordQuery(t *testing.T) {
+	server := httptest.NewServer(WithJsonResponse(`
+	{
+		"hits": [
+			{ "story_id": 123 },
+			{ "story_id": 456 },
+			{ "story_id": 789 }
+		]
+	}
+	`))
+	defer server.Close()
+	client := NewHnClientBuilder().SetSearchPopularityUrl(server.URL).Build()
+
+	items, err := client.Search(SearchRequest{
+		Query:   "multi word query",
+		Tags:    []string{"story"},
+		Ranking: Popularity,
+		Limit:   30,
+	})
+
+	assert.Nil(t, err)
+	assert.Equal(t, &SearchItems{
+		Ids:     []ItemId{123, 456, 789},
+		Ranking: Popularity,
+	}, items)
+}
+
 func TestSearchSucceedsWithALimitOfZero(t *testing.T) {
 	server := httptest.NewServer(WithJsonResponse(`
 	{

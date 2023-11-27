@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"net/url"
 	"strings"
 	"sync"
 )
@@ -167,16 +168,17 @@ func (hn *HnClient) Search(request SearchRequest) (*SearchItems, error) {
 		return nil, fmt.Errorf("Invalid limit: %d\n", request.Limit)
 	}
 
-	var url string
+	var endpoint string
 	switch request.Ranking {
 	case Popularity:
-		url = hn.searchPopularityUrl
+		endpoint = hn.searchPopularityUrl
 	case Date:
-		url = hn.searchDateUrl
+		endpoint = hn.searchDateUrl
 	}
-	tags := strings.Join(request.Tags, ",")
-	response, err := hn.client.Get(
-		fmt.Sprintf("%s?query=%s&tags=%s&hitsPerPage=%d", url, request.Query, tags, request.Limit))
+	query := url.QueryEscape(request.Query)
+	tags := url.QueryEscape(strings.Join(request.Tags, ","))
+	url := fmt.Sprintf("%s?query=%s&tags=%s&hitsPerPage=%d", endpoint, query, tags, request.Limit)
+	response, err := hn.client.Get(url)
 	if err != nil {
 		return nil, err
 	}
