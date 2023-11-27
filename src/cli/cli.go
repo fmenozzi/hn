@@ -33,9 +33,6 @@ type Args struct {
 	// Ranking method for search result items.
 	RankingSearchResults *api.SearchItemsRanking
 
-	// Raw string passed to -r/--ranking option (for error messages).
-	RankingRawString string
-
 	// Max number of stories to fetch.
 	Limit int
 
@@ -56,8 +53,8 @@ func ArgsFromCli() (Args, error) {
 	flag.Usage = func() { fmt.Print(usage) }
 	flag.BoolVar(&version, "v", false, "")
 	flag.BoolVar(&version, "version", false, "")
-	flag.StringVar(&ranking, "r", "top", "")
-	flag.StringVar(&ranking, "ranking", "top", "")
+	flag.StringVar(&ranking, "r", "", "")
+	flag.StringVar(&ranking, "ranking", "", "")
 	flag.IntVar(&limit, "l", 30, "")
 	flag.IntVar(&limit, "limit", 30, "")
 	flag.BoolVar(&styled, "s", false, "")
@@ -68,28 +65,38 @@ func ArgsFromCli() (Args, error) {
 
 	var frontPageRanking *api.FrontPageItemsRanking
 	var searchResultsRanking *api.SearchItemsRanking
-	switch ranking {
-	// Front page items
-	case "top":
-		frontPageRanking = api.Top.ToPointer()
-	case "new":
-		frontPageRanking = api.New.ToPointer()
-	case "best":
-		frontPageRanking = api.Best.ToPointer()
-	// Search result items
-	case "date":
-		searchResultsRanking = api.Date.ToPointer()
-	case "popularity":
-		searchResultsRanking = api.Popularity.ToPointer()
-	default:
-		return Args{}, fmt.Errorf("invalid ranking: %s", ranking)
+	if len(query) > 0 {
+		// --query was passed, interpret --ranking for search.
+		switch ranking {
+		case "":
+			fallthrough
+		case "date":
+			searchResultsRanking = api.Date.ToPointer()
+		case "popularity":
+			searchResultsRanking = api.Popularity.ToPointer()
+		default:
+			return Args{}, fmt.Errorf("invalid search ranking: %s", ranking)
+		}
+	} else {
+		// --query was not passed, interpret --ranking for front page.
+		switch ranking {
+		case "":
+			fallthrough
+		case "top":
+			frontPageRanking = api.Top.ToPointer()
+		case "new":
+			frontPageRanking = api.New.ToPointer()
+		case "best":
+			frontPageRanking = api.Best.ToPointer()
+		default:
+			return Args{}, fmt.Errorf("invalid front page ranking: %s", ranking)
+		}
 	}
 
 	return Args{
 		Version:              version,
 		RankingFrontPage:     frontPageRanking,
 		RankingSearchResults: searchResultsRanking,
-		RankingRawString:     ranking,
 		Limit:                limit,
 		Styled:               styled,
 		Query:                query,

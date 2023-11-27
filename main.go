@@ -64,10 +64,6 @@ func main() {
 	}
 
 	if len(args.Query) != 0 {
-		if args.RankingSearchResults == nil {
-			fmt.Printf("error: invalid search result ranking: %v\n", args.RankingRawString)
-			os.Exit(1)
-		}
 		request := api.SearchRequest{
 			Query:   args.Query,
 			Tags:    []string{"story"},
@@ -76,10 +72,6 @@ func main() {
 		}
 		DisplayItems(FetchSearchItems(request), args.Styled)
 	} else {
-		if args.RankingFrontPage == nil {
-			fmt.Printf("error: invalid front page ranking: %v\n", args.RankingRawString)
-			os.Exit(1)
-		}
 		DisplayItems(FetchFrontPageItems(*args.RankingFrontPage, args.Limit), args.Styled)
 	}
 }
