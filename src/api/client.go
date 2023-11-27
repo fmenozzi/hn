@@ -68,7 +68,7 @@ func MakeProdClient() HnClient {
 
 func (hn *HnClient) FetchFrontPageItemIds(ranking FrontPageItemsRanking, limit int) ([]ItemId, error) {
 	if limit < 0 || limit > MaxStoriesLimit {
-		return nil, fmt.Errorf("Invalid limit: %d\n", limit)
+		return nil, fmt.Errorf("invalid limit: %d\n", limit)
 	}
 
 	var endpoint string
@@ -86,7 +86,7 @@ func (hn *HnClient) FetchFrontPageItemIds(ranking FrontPageItemsRanking, limit i
 	}
 	defer response.Body.Close()
 	if response.StatusCode > 299 {
-		return nil, fmt.Errorf("Response failed with code %d\n", response.StatusCode)
+		return nil, fmt.Errorf("response failed with code %d\n", response.StatusCode)
 	}
 	body, err := io.ReadAll(response.Body)
 	if err != nil {
@@ -111,7 +111,7 @@ func (hn *HnClient) FetchItem(id ItemId) (*Item, error) {
 	}
 	defer response.Body.Close()
 	if response.StatusCode > 299 {
-		return nil, fmt.Errorf("Response failed with code %d\n", response.StatusCode)
+		return nil, fmt.Errorf("response failed with code %d\n", response.StatusCode)
 	}
 	body, err := io.ReadAll(response.Body)
 	if err != nil {
@@ -165,7 +165,7 @@ func (hn *HnClient) FetchItems(ids []ItemId) ([]Item, error) {
 
 func (hn *HnClient) Search(request SearchRequest) ([]ItemId, error) {
 	if request.Limit < 0 || request.Limit > MaxStoriesLimit {
-		return nil, fmt.Errorf("Invalid limit: %d\n", request.Limit)
+		return nil, fmt.Errorf("invalid limit: %d\n", request.Limit)
 	}
 
 	var endpoint string
@@ -184,7 +184,7 @@ func (hn *HnClient) Search(request SearchRequest) ([]ItemId, error) {
 	}
 	defer response.Body.Close()
 	if response.StatusCode > 299 {
-		return nil, fmt.Errorf("Response failed with code %d\n", response.StatusCode)
+		return nil, fmt.Errorf("response failed with code %d\n", response.StatusCode)
 	}
 	body, err := io.ReadAll(response.Body)
 	if err != nil {

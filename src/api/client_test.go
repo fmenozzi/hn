@@ -73,11 +73,11 @@ func TestFetchFrontPageItemIdsFailsWithInvalidLimits(t *testing.T) {
 
 	_, err := client.FetchFrontPageItemIds(Top, -1)
 	assert.NotNil(t, err)
-	assert.ErrorContains(t, err, "Invalid limit")
+	assert.ErrorContains(t, err, "invalid limit")
 
 	_, err = client.FetchFrontPageItemIds(Top, MaxStoriesLimit+1)
 	assert.NotNil(t, err)
-	assert.ErrorContains(t, err, "Invalid limit")
+	assert.ErrorContains(t, err, "invalid limit")
 }
 
 func TestFetchFrontPageItemIdsFailsIfServerReturns500(t *testing.T) {
@@ -342,11 +342,11 @@ func TestSearchFailsWithInvalidLimits(t *testing.T) {
 
 	_, err := client.Search(SearchRequest{Limit: -1})
 	assert.NotNil(t, err)
-	assert.ErrorContains(t, err, "Invalid limit")
+	assert.ErrorContains(t, err, "invalid limit")
 
 	_, err = client.Search(SearchRequest{Limit: MaxStoriesLimit + 1})
 	assert.NotNil(t, err)
-	assert.ErrorContains(t, err, "Invalid limit")
+	assert.ErrorContains(t, err, "invalid limit")
 }
 
 func TestSearchFailsIfJsonCannotBeParsed(t *testing.T) {
