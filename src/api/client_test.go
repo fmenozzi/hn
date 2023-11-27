@@ -55,6 +55,17 @@ func TestFetchRankedStoriesIdsSucceedsWithLimitOfZero(t *testing.T) {
 	assert.Empty(t, rankedStoriesIds)
 }
 
+func TestFetchRankedStoriesIdsSucceedsWithLimitLessThanResponseSize(t *testing.T) {
+	server := httptest.NewServer(WithJsonResponse("[123, 456, 789]"))
+	defer server.Close()
+	client := NewHnClientBuilder().SetHnUrl(server.URL).Build()
+
+	rankedStoriesIds, err := client.FetchRankedStoriesIds(Top, 1)
+
+	assert.Nil(t, err)
+	assert.Equal(t, rankedStoriesIds, []ItemId{123})
+}
+
 func TestFetchRankedStoriesIdsFailsWithInvalidLimits(t *testing.T) {
 	server := httptest.NewServer(WithJsonResponse("[]")) // unimportant
 	defer server.Close()
@@ -292,6 +303,33 @@ func TestSearchSucceedsWithALimitOfZero(t *testing.T) {
 	assert.Nil(t, err)
 	assert.Equal(t, &SearchItems{
 		Ids:     []ItemId{},
+		Ranking: Popularity,
+	}, items)
+}
+
+func TestSearchSucceedsWithALimitLessThanResponseSize(t *testing.T) {
+	server := httptest.NewServer(WithJsonResponse(`
+	{
+		"hits": [
+			{ "story_id": 123 },
+			{ "story_id": 456 },
+			{ "story_id": 789 }
+		]
+	}
+	`))
+	defer server.Close()
+	client := NewHnClientBuilder().SetSearchPopularityUrl(server.URL).Build()
+
+	items, err := client.Search(SearchRequest{
+		Query:   "query", // unimportant
+		Tags:    []string{"story"},
+		Ranking: Popularity,
+		Limit:   1,
+	})
+
+	assert.Nil(t, err)
+	assert.Equal(t, &SearchItems{
+		Ids:     []ItemId{123},
 		Ranking: Popularity,
 	}, items)
 }
