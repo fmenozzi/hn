@@ -16,7 +16,7 @@ Options:
     -h, --help      show this help message and exit
     -v, --version   show program version information and exit
     -l, --limit     max number of results to fetch (default: 30)
-    -s, --style     output style, one of plain|markdown|csv (default: plain)
+    -s, --style     output style, one of plain|markdown|md|csv (default: plain)
     -r, --ranking   ranking method
                     top|new|best for front page items (default: top)
                     date|popularity for search result items (default: popularity)
@@ -103,6 +103,8 @@ func ArgsFromCli() (Args, error) {
 		fallthrough
 	case "plain":
 		style = formatting.Plain
+	case "md":
+		fallthrough
 	case "markdown":
 		style = formatting.Markdown
 	case "csv":
