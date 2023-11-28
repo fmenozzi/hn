@@ -154,7 +154,7 @@ func (hn *HnClient) FetchItems(ids []ItemId) ([]Item, error) {
 	for i, id := range ids {
 		mapitem, ok := itemsMap.Load(id)
 		if !ok {
-			return nil, fmt.Errorf("no item %d in items map", id)
+			panic(fmt.Sprintf("no item %d in items map\n", id))
 		}
 		item := mapitem.(Item)
 		items[i] = item

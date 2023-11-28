@@ -10,30 +10,30 @@ import (
 	"github.com/fmenozzi/hn/src/formatting"
 )
 
-func FetchFrontPageItems(ranking api.FrontPageItemsRanking, limit int) []api.Item {
+func FetchFrontPageItems(ranking api.FrontPageItemsRanking, limit int) ([]api.Item, error) {
 	client := api.MakeProdClient()
 	frontPageItemIds, err := client.FetchFrontPageItemIds(ranking, limit)
 	if err != nil {
-		panic(fmt.Sprintf("error: %s\n", err))
+		return nil, err
 	}
 	frontPageItems, err := client.FetchItems(frontPageItemIds)
 	if err != nil {
-		panic(fmt.Sprintf("error: %s\n", err))
+		return nil, err
 	}
-	return frontPageItems
+	return frontPageItems, nil
 }
 
-func FetchSearchItems(request api.SearchRequest) []api.Item {
+func FetchSearchItems(request api.SearchRequest) ([]api.Item, error) {
 	client := api.MakeProdClient()
 	searchItemIds, err := client.Search(request)
 	if err != nil {
-		panic(fmt.Sprintf("error: %s\n", err))
+		return nil, err
 	}
 	searchItems, err := client.FetchItems(searchItemIds)
 	if err != nil {
-		panic(fmt.Sprintf("error: %s\n", err))
+		return nil, err
 	}
-	return searchItems
+	return searchItems, nil
 }
 
 func DisplayItems(items []api.Item, style formatting.Style) {
@@ -54,7 +54,7 @@ func DisplayItems(items []api.Item, style formatting.Style) {
 func main() {
 	args, err := cli.ArgsFromCli()
 	if err != nil {
-		fmt.Printf("error: %s\n", err.Error())
+		fmt.Fprint(os.Stderr, err.Error())
 		os.Exit(1)
 	}
 
@@ -64,14 +64,23 @@ func main() {
 	}
 
 	if len(args.Query) != 0 {
-		request := api.SearchRequest{
+		searchItems, err := FetchSearchItems(api.SearchRequest{
 			Query:   args.Query,
 			Tags:    []string{"story"},
 			Ranking: *args.RankingSearchResults,
 			Limit:   args.Limit,
+		})
+		if err != nil {
+			fmt.Fprint(os.Stderr, err.Error())
+			os.Exit(1)
 		}
-		DisplayItems(FetchSearchItems(request), args.Style)
+		DisplayItems(searchItems, args.Style)
 	} else {
-		DisplayItems(FetchFrontPageItems(*args.RankingFrontPage, args.Limit), args.Style)
+		frontPageItems, err := FetchFrontPageItems(*args.RankingFrontPage, args.Limit)
+		if err != nil {
+			fmt.Fprint(os.Stderr, err.Error())
+			os.Exit(1)
+		}
+		DisplayItems(frontPageItems, args.Style)
 	}
 }
