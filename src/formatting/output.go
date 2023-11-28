@@ -27,7 +27,7 @@ func StoryOutput(story *api.Item, styled bool) string {
 	title := *story.Title
 	url := postUrl
 
-	if story.Url != nil {
+	if story.Url != nil && len(*story.Url) > 0 {
 		url = *story.Url
 	}
 
