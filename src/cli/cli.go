@@ -70,10 +70,10 @@ func ArgsFromCli() (Args, error) {
 		switch ranking {
 		case "":
 			fallthrough
-		case "date":
-			searchResultsRanking = api.Date.ToPointer()
 		case "popularity":
 			searchResultsRanking = api.Popularity.ToPointer()
+		case "date":
+			searchResultsRanking = api.Date.ToPointer()
 		default:
 			return Args{}, fmt.Errorf("invalid search ranking: %s", ranking)
 		}
