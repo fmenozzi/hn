@@ -66,7 +66,7 @@ func PollOutput(poll *api.Item, style Style) string {
 	case Plain:
 		return fmt.Sprintf("[%4d pts] [%4d comments] %s\n", score, comments, postUrl)
 	case Markdown:
-		return fmt.Sprintf("* [%4d pts] [[%4d comments](%s) [%s](%s)\n", score, comments, postUrl, title, postUrl)
+		return fmt.Sprintf("* [%4d pts] [[%4d comments](%s)] [%s](%s)\n", score, comments, postUrl, title, postUrl)
 	case Csv:
 		return fmt.Sprintf("%d,poll,%s,\"%s\",%s,%d,%d\n", poll.Id, *poll.By, title, postUrl, score, comments)
 	default:
