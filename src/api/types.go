@@ -26,7 +26,7 @@ type Item struct {
 	By *string `json:"by"`
 
 	// Creation date of the item in Unix time.
-	Time *uint32 `json:"time"`
+	Time *int64 `json:"time"`
 
 	// The comment, story, or poll text in HTML.
 	Text *string `json:"text"`
