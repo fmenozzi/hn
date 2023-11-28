@@ -75,7 +75,7 @@ func TestFetchFrontPageItemIdsFailsWithInvalidLimits(t *testing.T) {
 	assert.NotNil(t, err)
 	assert.ErrorContains(t, err, "invalid limit")
 
-	_, err = client.FetchFrontPageItemIds(Top, MaxStoriesLimit+1)
+	_, err = client.FetchFrontPageItemIds(Top, maxStoriesLimit+1)
 	assert.NotNil(t, err)
 	assert.ErrorContains(t, err, "invalid limit")
 }
@@ -344,7 +344,7 @@ func TestSearchFailsWithInvalidLimits(t *testing.T) {
 	assert.NotNil(t, err)
 	assert.ErrorContains(t, err, "invalid limit")
 
-	_, err = client.Search(SearchRequest{Limit: MaxStoriesLimit + 1})
+	_, err = client.Search(SearchRequest{Limit: maxStoriesLimit + 1})
 	assert.NotNil(t, err)
 	assert.ErrorContains(t, err, "invalid limit")
 }

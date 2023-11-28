@@ -14,7 +14,7 @@ const (
 	prodHnUrl               string = "https://hacker-news.firebaseio.com/v0/"
 	prodSearchPopularityUrl string = "http://hn.algolia.com/api/v1/search"
 	prodSearchDateUrl       string = "http://hn.algolia.com/api/v1/search_by_date"
-	MaxStoriesLimit         int    = 500
+	maxStoriesLimit         int    = 500
 )
 
 type HnClient struct {
@@ -67,7 +67,7 @@ func MakeProdClient() HnClient {
 }
 
 func (hn *HnClient) FetchFrontPageItemIds(ranking FrontPageItemsRanking, limit int) ([]ItemId, error) {
-	if limit < 0 || limit > MaxStoriesLimit {
+	if limit < 0 || limit > maxStoriesLimit {
 		return nil, fmt.Errorf("invalid limit: %d\n", limit)
 	}
 
@@ -164,7 +164,7 @@ func (hn *HnClient) FetchItems(ids []ItemId) ([]Item, error) {
 }
 
 func (hn *HnClient) Search(request SearchRequest) ([]ItemId, error) {
-	if request.Limit < 0 || request.Limit > MaxStoriesLimit {
+	if request.Limit < 0 || request.Limit > maxStoriesLimit {
 		return nil, fmt.Errorf("invalid limit: %d\n", request.Limit)
 	}
 
