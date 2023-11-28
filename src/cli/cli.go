@@ -16,11 +16,14 @@ Options:
     -h, --help      show this help message and exit
     -v, --version   show program version information and exit
     -l, --limit     max number of results to fetch (default: 30)
-    -s, --style     output style, one of plain|markdown (default: plain)
+    -s, --style     output style, one of plain|markdown|csv (default: plain)
     -r, --ranking   ranking method
                     top|new|best for front page items (default: top)
                     date|popularity for search result items (default: popularity)
     -q, --query     search query
+
+Notes:
+	The output for --style=csv is: id,type,by,title,url,score,comments
 `
 )
 
@@ -102,6 +105,8 @@ func ArgsFromCli() (Args, error) {
 		style = formatting.Plain
 	case "markdown":
 		style = formatting.Markdown
+	case "csv":
+		style = formatting.Csv
 	default:
 		return Args{}, fmt.Errorf("invalid style: %s", style)
 	}
