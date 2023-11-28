@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	"github.com/fmenozzi/hn/src/api"
+	"github.com/fmenozzi/hn/src/formatting"
 )
 
 const (
@@ -15,7 +16,7 @@ Options:
     -h, --help      show this help message and exit
     -v, --version   show program version information and exit
     -l, --limit     max number of results to fetch (default: 30)
-    -s, --styled    if true, format output for piping into mdcat
+    -s, --style     output style, one of plain|markdown (default: plain)
     -r, --ranking   ranking method
                     top|new|best for front page items (default: top)
                     date|popularity for search result items (default: popularity)
@@ -36,8 +37,8 @@ type Args struct {
 	// Max number of stories to fetch.
 	Limit int
 
-	// If true, format output for piping into `mdcat`.
-	Styled bool
+	// Output formatting style.
+	Style formatting.Style
 
 	// Search query for searching items via the Algolia API.
 	Query string
@@ -46,7 +47,7 @@ type Args struct {
 func ArgsFromCli() (Args, error) {
 	var version bool
 	var limit int
-	var styled bool
+	var stylestr string
 	var ranking string
 	var query string
 
@@ -57,8 +58,8 @@ func ArgsFromCli() (Args, error) {
 	flag.StringVar(&ranking, "ranking", "", "")
 	flag.IntVar(&limit, "l", 30, "")
 	flag.IntVar(&limit, "limit", 30, "")
-	flag.BoolVar(&styled, "s", false, "")
-	flag.BoolVar(&styled, "styled", false, "")
+	flag.StringVar(&stylestr, "s", "plain", "")
+	flag.StringVar(&stylestr, "style", "plain", "")
 	flag.StringVar(&query, "q", "", "")
 	flag.StringVar(&query, "query", "", "")
 	flag.Parse()
@@ -93,12 +94,24 @@ func ArgsFromCli() (Args, error) {
 		}
 	}
 
+	var style formatting.Style
+	switch stylestr {
+	case "":
+		fallthrough
+	case "plain":
+		style = formatting.Plain
+	case "markdown":
+		style = formatting.Markdown
+	default:
+		return Args{}, fmt.Errorf("invalid style: %s", style)
+	}
+
 	return Args{
 		Version:              version,
 		RankingFrontPage:     frontPageRanking,
 		RankingSearchResults: searchResultsRanking,
 		Limit:                limit,
-		Styled:               styled,
+		Style:                style,
 		Query:                query,
 	}, nil
 }

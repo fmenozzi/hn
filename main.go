@@ -36,16 +36,16 @@ func FetchSearchItems(request api.SearchRequest) []api.Item {
 	return searchItems
 }
 
-func DisplayItems(items []api.Item, styled bool) {
+func DisplayItems(items []api.Item, style formatting.Style) {
 	var builder strings.Builder
 	for _, item := range items {
 		switch item.Type {
 		case api.Job:
-			builder.WriteString(formatting.JobOutput(&item, styled))
+			builder.WriteString(formatting.JobOutput(&item, style))
 		case api.Story:
-			builder.WriteString(formatting.StoryOutput(&item, styled))
+			builder.WriteString(formatting.StoryOutput(&item, style))
 		case api.Poll:
-			builder.WriteString(formatting.PollOutput(&item, styled))
+			builder.WriteString(formatting.PollOutput(&item, style))
 		}
 	}
 	fmt.Print(builder.String())
@@ -70,8 +70,8 @@ func main() {
 			Ranking: *args.RankingSearchResults,
 			Limit:   args.Limit,
 		}
-		DisplayItems(FetchSearchItems(request), args.Styled)
+		DisplayItems(FetchSearchItems(request), args.Style)
 	} else {
-		DisplayItems(FetchFrontPageItems(*args.RankingFrontPage, args.Limit), args.Styled)
+		DisplayItems(FetchFrontPageItems(*args.RankingFrontPage, args.Limit), args.Style)
 	}
 }
