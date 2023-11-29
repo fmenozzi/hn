@@ -33,12 +33,10 @@ func GetRelativeTime(clock Clock, timestamp time.Time) string {
 	elapsed := now.Sub(timestamp)
 
 	switch {
-	case elapsed < 30*time.Second:
-		return "a few seconds ago"
 	case elapsed < 90*time.Second:
 		return "a minute ago"
 	case elapsed < 50*time.Minute:
-		return fmt.Sprintf("%.0f minutes ago", math.Ceil(elapsed.Minutes()))
+		return fmt.Sprintf("%.0f min ago", math.Ceil(elapsed.Minutes()))
 	case elapsed < 90*time.Minute:
 		return "an hour ago"
 	case elapsed < 21*time.Hour:

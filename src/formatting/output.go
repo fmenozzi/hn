@@ -25,9 +25,9 @@ func JobOutput(job *api.Item, style Style, clock Clock) string {
 
 	switch style {
 	case Plain:
-		return fmt.Sprintf("[%4d pts] [%17s] [       HIRING] %s\n", score, time, title)
+		return fmt.Sprintf("[%4d pts] [%14s] [       HIRING] %s\n", score, time, title)
 	case Markdown:
-		return fmt.Sprintf("* [%4d pts] [%17s] [       [HIRING](%s)] [%s](%s)\n", score, time, postUrl, title, postUrl)
+		return fmt.Sprintf("* [%4d pts] [%14s] [       [HIRING](%s)] [%s](%s)\n", score, time, postUrl, title, postUrl)
 	case Csv:
 		return fmt.Sprintf("%d,job,%s,%d,\"%s\",%s,%d,0\n", job.Id, *job.By, *job.Time, title, postUrl, score)
 	default:
@@ -49,9 +49,9 @@ func StoryOutput(story *api.Item, style Style, clock Clock) string {
 
 	switch style {
 	case Plain:
-		return fmt.Sprintf("[%4d pts] [%17s] [%4d comments] %s\n", score, time, comments, url)
+		return fmt.Sprintf("[%4d pts] [%14s] [%4d comments] %s\n", score, time, comments, url)
 	case Markdown:
-		return fmt.Sprintf("* [%4d pts] [%17s] [[%4d comments](%s)] [%s](%s)\n", score, time, comments, postUrl, title, url)
+		return fmt.Sprintf("* [%4d pts] [%14s] [[%4d comments](%s)] [%s](%s)\n", score, time, comments, postUrl, title, url)
 	case Csv:
 		return fmt.Sprintf("%d,story,%s,%d,\"%s\",%s,%d,%d\n", story.Id, *story.By, *story.Time, title, url, score, comments)
 	default:
@@ -68,9 +68,9 @@ func PollOutput(poll *api.Item, style Style, clock Clock) string {
 
 	switch style {
 	case Plain:
-		return fmt.Sprintf("[%4d pts] [%17s] [%4d comments] %s\n", score, time, comments, postUrl)
+		return fmt.Sprintf("[%4d pts] [%14s] [%4d comments] %s\n", score, time, comments, postUrl)
 	case Markdown:
-		return fmt.Sprintf("* [%4d pts] [%17s] [[%4d comments](%s)] [%s](%s)\n", score, time, comments, postUrl, title, postUrl)
+		return fmt.Sprintf("* [%4d pts] [%14s] [[%4d comments](%s)] [%s](%s)\n", score, time, comments, postUrl, title, postUrl)
 	case Csv:
 		return fmt.Sprintf("%d,poll,%s,%d,\"%s\",%s,%d,%d\n", poll.Id, *poll.By, *poll.Time, title, postUrl, score, comments)
 	default:

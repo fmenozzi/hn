@@ -38,10 +38,10 @@ func TestRelativeTime(t *testing.T) {
 	eighteenMonthsAgo := now.Add(-18 * month)
 	fourYearsAgo := now.Add(-4 * year)
 
-	assert.Equal(t, "a few seconds ago", GetRelativeTime(&clock, fiveSecondsAgo))
+	assert.Equal(t, "a minute ago", GetRelativeTime(&clock, fiveSecondsAgo))
 	assert.Equal(t, "a minute ago", GetRelativeTime(&clock, fortyFiveSecondsAgo))
 	assert.Equal(t, "a minute ago", GetRelativeTime(&clock, eightySecondsAgo))
-	assert.Equal(t, "45 minutes ago", GetRelativeTime(&clock, fortyFiveMinutesAgo))
+	assert.Equal(t, "45 min ago", GetRelativeTime(&clock, fortyFiveMinutesAgo))
 	assert.Equal(t, "an hour ago", GetRelativeTime(&clock, fiftyFiveMinutesAgo))
 	assert.Equal(t, "an hour ago", GetRelativeTime(&clock, eightyFiveMinutesAgo))
 	assert.Equal(t, "2 hours ago", GetRelativeTime(&clock, twoHoursAgo))

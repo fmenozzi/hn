@@ -57,9 +57,9 @@ func TestPlainOutput(t *testing.T) {
 	storyOutput := StoryOutput(&story, Plain, &fakeClock)
 	pollOutput := PollOutput(&poll, Plain, &fakeClock)
 
-	expectedJobOutput := "[   1 pts] [      6 hours ago] [       HIRING] Job title\n"
-	expectedStoryOutput := "[  10 pts] [      12 days ago] [  20 comments] www.story.url\n"
-	expectedPollOutput := "[ 100 pts] [   40 minutes ago] [ 200 comments] https://news.ycombinator.com/item?id=3\n"
+	expectedJobOutput := "[   1 pts] [   6 hours ago] [       HIRING] Job title\n"
+	expectedStoryOutput := "[  10 pts] [   12 days ago] [  20 comments] www.story.url\n"
+	expectedPollOutput := "[ 100 pts] [    40 min ago] [ 200 comments] https://news.ycombinator.com/item?id=3\n"
 
 	assert.Equal(t, expectedJobOutput, jobOutput)
 	assert.Equal(t, expectedStoryOutput, storyOutput)
@@ -71,9 +71,9 @@ func TestMarkdownOutput(t *testing.T) {
 	storyOutput := StoryOutput(&story, Markdown, &fakeClock)
 	pollOutput := PollOutput(&poll, Markdown, &fakeClock)
 
-	expectedJobOutput := "* [   1 pts] [      6 hours ago] [       [HIRING](https://news.ycombinator.com/item?id=1)] [Job title](https://news.ycombinator.com/item?id=1)\n"
-	expectedStoryOutput := "* [  10 pts] [      12 days ago] [[  20 comments](https://news.ycombinator.com/item?id=2)] [Story title](www.story.url)\n"
-	expectedPollOutput := "* [ 100 pts] [   40 minutes ago] [[ 200 comments](https://news.ycombinator.com/item?id=3)] [Poll title](https://news.ycombinator.com/item?id=3)\n"
+	expectedJobOutput := "* [   1 pts] [   6 hours ago] [       [HIRING](https://news.ycombinator.com/item?id=1)] [Job title](https://news.ycombinator.com/item?id=1)\n"
+	expectedStoryOutput := "* [  10 pts] [   12 days ago] [[  20 comments](https://news.ycombinator.com/item?id=2)] [Story title](www.story.url)\n"
+	expectedPollOutput := "* [ 100 pts] [    40 min ago] [[ 200 comments](https://news.ycombinator.com/item?id=3)] [Poll title](https://news.ycombinator.com/item?id=3)\n"
 
 	assert.Equal(t, expectedJobOutput, jobOutput)
 	assert.Equal(t, expectedStoryOutput, storyOutput)
