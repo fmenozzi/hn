@@ -3,7 +3,8 @@ A simple commandline hacker news client.
 Features:
 * Browse the front page anonymously (i.e. no login) and sort by new, hot, best
 * Search for stories via the Algolia API and sort by date, popularity
-* Format output for terminal markdown viewing (via e.g. `kitty`) or csv
+* Format output for terminal markdown viewing (via e.g. [`mdcat`](https://github.com/swsnr/mdcat)) or csv
+    * Markdown via `mdcat` et al only possible on supported terminals (e.g. [`kitty`](https://sw.kovidgoyal.net/kitty/), [`iTerm2`](https://iterm2.com/))
 
 Examples:
 * Get top 30 stories on the front page:
@@ -12,7 +13,7 @@ Examples:
   hn
   ```
   
-* Get newest 50 stories on the front page and output as markdown:
+* Get newest 50 stories on the front page and output as markdown using `mdcat`:
 
   ```sh
   hn --ranking new --limit 50 --style markdown | mdcat
@@ -39,3 +40,5 @@ Options:
 Notes:
 	The output for --style=csv is: id,type,by,timestamp,title,url,score,comments
 ```
+
+This code is licensed under the [GNU General Public License version 3](https://www.gnu.org/licenses/gpl-3.0.en.html).
