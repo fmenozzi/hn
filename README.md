@@ -37,5 +37,5 @@ Options:
     -q, --query     search query
 
 Notes:
-	The output for --style=csv is: id,type,by,title,url,score,comments
+	The output for --style=csv is: id,type,by,timestamp,title,url,score,comments
 ```

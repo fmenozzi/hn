@@ -10,6 +10,8 @@ import (
 	"github.com/fmenozzi/hn/src/formatting"
 )
 
+var clock formatting.RealClock
+
 func FetchFrontPageItems(ranking api.FrontPageItemsRanking, limit int) ([]api.Item, error) {
 	client := api.MakeProdClient()
 	frontPageItemIds, err := client.FetchFrontPageItemIds(ranking, limit)
@@ -41,11 +43,11 @@ func DisplayItems(items []api.Item, style formatting.Style) {
 	for _, item := range items {
 		switch item.Type {
 		case api.Job:
-			builder.WriteString(formatting.JobOutput(&item, style))
+			builder.WriteString(formatting.JobOutput(&item, style, &clock))
 		case api.Story:
-			builder.WriteString(formatting.StoryOutput(&item, style))
+			builder.WriteString(formatting.StoryOutput(&item, style, &clock))
 		case api.Poll:
-			builder.WriteString(formatting.PollOutput(&item, style))
+			builder.WriteString(formatting.PollOutput(&item, style, &clock))
 		}
 	}
 	fmt.Print(builder.String())
