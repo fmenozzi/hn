@@ -27,9 +27,13 @@ func FetchFrontPageItems(ranking api.FrontPageItemsRanking, limit int) ([]api.It
 
 func FetchSearchItems(request api.SearchRequest) ([]api.Item, error) {
 	client := api.MakeProdClient()
-	searchItemIds, err := client.Search(request)
+	searchResponse, err := client.Search(request)
 	if err != nil {
 		return nil, err
+	}
+	searchItemIds := make([]api.ItemId, len(searchResponse.Results))
+	for i, result := range searchResponse.Results {
+		searchItemIds[i] = result.Id
 	}
 	searchItems, err := client.FetchItems(searchItemIds)
 	if err != nil {

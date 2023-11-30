@@ -89,8 +89,22 @@ type SearchRequest struct {
 	Limit   int
 }
 
+type SearchResult struct {
+	Id                         ItemId
+	HighlightResultCommentText string
+}
+
+type SearchResponse struct {
+	Results []SearchResult
+}
+
 type SearchResultJson struct {
-	Id string `json:"objectID"`
+	Id              string `json:"objectID"`
+	HighlightResult struct {
+		CommentText struct {
+			Value string `json:"value"`
+		} `json:"comment_text"`
+	} `json:"_highlightResult"`
 }
 
 type SearchResponseJson struct {

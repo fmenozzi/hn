@@ -163,7 +163,7 @@ func (hn *HnClient) FetchItems(ids []ItemId) ([]Item, error) {
 	return items, nil
 }
 
-func (hn *HnClient) Search(request SearchRequest) ([]ItemId, error) {
+func (hn *HnClient) Search(request SearchRequest) (*SearchResponse, error) {
 	if request.Limit < 0 || request.Limit > maxStoriesLimit {
 		return nil, fmt.Errorf("invalid limit: %d\n", request.Limit)
 	}
@@ -202,13 +202,19 @@ func (hn *HnClient) Search(request SearchRequest) ([]ItemId, error) {
 	} else {
 		hits = searchResponse.Hits[:request.Limit]
 	}
-	ids := make([]ItemId, len(hits))
+	results := make([]SearchResult, len(hits))
 	for i, hit := range hits {
 		id, err := strconv.Atoi(hit.Id)
 		if err != nil {
 			return nil, err
 		}
-		ids[i] = int32(id)
+		highlightResultCommentText := hit.HighlightResult.CommentText.Value
+		results[i] = SearchResult{
+			Id:                         int32(id),
+			HighlightResultCommentText: highlightResultCommentText,
+		}
 	}
-	return ids, nil
+	return &SearchResponse{
+		Results: results,
+	}, nil
 }

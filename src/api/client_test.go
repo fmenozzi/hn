@@ -212,7 +212,7 @@ func TestSearchSucceedsIfServerReturns200(t *testing.T) {
 	defer server.Close()
 	client := NewHnClientBuilder().SetSearchPopularityUrl(server.URL).Build()
 
-	items, err := client.Search(SearchRequest{
+	response, err := client.Search(SearchRequest{
 		Query:   "query", // unimportant
 		Tags:    "story",
 		Ranking: Popularity,
@@ -220,7 +220,11 @@ func TestSearchSucceedsIfServerReturns200(t *testing.T) {
 	})
 
 	assert.Nil(t, err)
-	assert.Equal(t, []ItemId{123, 456, 789}, items)
+	assert.Equal(t, &SearchResponse{Results: []SearchResult{
+		{Id: 123},
+		{Id: 456},
+		{Id: 789},
+	}}, response)
 }
 
 func TestSearchSucceedsWhenSortingByDate(t *testing.T) {
@@ -236,7 +240,7 @@ func TestSearchSucceedsWhenSortingByDate(t *testing.T) {
 	defer server.Close()
 	client := NewHnClientBuilder().SetSearchDateUrl(server.URL).Build()
 
-	items, err := client.Search(SearchRequest{
+	response, err := client.Search(SearchRequest{
 		Query:   "query", // unimportant
 		Tags:    "story",
 		Ranking: Date,
@@ -244,7 +248,11 @@ func TestSearchSucceedsWhenSortingByDate(t *testing.T) {
 	})
 
 	assert.Nil(t, err)
-	assert.Equal(t, []ItemId{123, 456, 789}, items)
+	assert.Equal(t, &SearchResponse{Results: []SearchResult{
+		{Id: 123},
+		{Id: 456},
+		{Id: 789},
+	}}, response)
 }
 
 func TestSearchSucceedsWithMultiWordQuery(t *testing.T) {
@@ -260,7 +268,7 @@ func TestSearchSucceedsWithMultiWordQuery(t *testing.T) {
 	defer server.Close()
 	client := NewHnClientBuilder().SetSearchPopularityUrl(server.URL).Build()
 
-	items, err := client.Search(SearchRequest{
+	response, err := client.Search(SearchRequest{
 		Query:   "multi word query",
 		Tags:    "story",
 		Ranking: Popularity,
@@ -268,7 +276,11 @@ func TestSearchSucceedsWithMultiWordQuery(t *testing.T) {
 	})
 
 	assert.Nil(t, err)
-	assert.Equal(t, []ItemId{123, 456, 789}, items)
+	assert.Equal(t, &SearchResponse{Results: []SearchResult{
+		{Id: 123},
+		{Id: 456},
+		{Id: 789},
+	}}, response)
 }
 
 func TestSearchSucceedsWithALimitOfZero(t *testing.T) {
@@ -284,7 +296,7 @@ func TestSearchSucceedsWithALimitOfZero(t *testing.T) {
 	defer server.Close()
 	client := NewHnClientBuilder().SetSearchPopularityUrl(server.URL).Build()
 
-	items, err := client.Search(SearchRequest{
+	response, err := client.Search(SearchRequest{
 		Query:   "query", // unimportant
 		Tags:    "story",
 		Ranking: Popularity,
@@ -292,7 +304,7 @@ func TestSearchSucceedsWithALimitOfZero(t *testing.T) {
 	})
 
 	assert.Nil(t, err)
-	assert.Empty(t, items)
+	assert.Empty(t, response.Results)
 }
 
 func TestSearchSucceedsWithALimitLessThanResponseSize(t *testing.T) {
@@ -308,7 +320,7 @@ func TestSearchSucceedsWithALimitLessThanResponseSize(t *testing.T) {
 	defer server.Close()
 	client := NewHnClientBuilder().SetSearchPopularityUrl(server.URL).Build()
 
-	items, err := client.Search(SearchRequest{
+	response, err := client.Search(SearchRequest{
 		Query:   "query", // unimportant
 		Tags:    "story",
 		Ranking: Popularity,
@@ -316,7 +328,9 @@ func TestSearchSucceedsWithALimitLessThanResponseSize(t *testing.T) {
 	})
 
 	assert.Nil(t, err)
-	assert.Equal(t, []ItemId{123}, items)
+	assert.Equal(t, &SearchResponse{Results: []SearchResult{
+		{Id: 123},
+	}}, response)
 }
 
 func TestSearchFailsWhenServerReturns500(t *testing.T) {
