@@ -77,3 +77,11 @@ func PollOutput(poll *api.Item, style Style, clock Clock) string {
 		panic(fmt.Sprintf("invalid style: %s\n", style))
 	}
 }
+
+func PollOptOutput(pollopt *api.Item, style Style, clock Clock) string {
+	return fmt.Sprintf("pollopt with id %d\n", pollopt.Id)
+}
+
+func CommentOutput(comment *api.Item, style Style, clock Clock) string {
+	return fmt.Sprintf("comment with id %d\n", comment.Id)
+}

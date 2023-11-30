@@ -84,13 +84,13 @@ func (r SearchItemsRanking) ToPointer() *SearchItemsRanking {
 
 type SearchRequest struct {
 	Query   string
-	Tags    []string
+	Tags    string
 	Ranking SearchItemsRanking
 	Limit   int
 }
 
 type SearchResultJson struct {
-	StoryId ItemId `json:"story_id"`
+	Id string `json:"objectID"`
 }
 
 type SearchResponseJson struct {

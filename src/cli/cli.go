@@ -21,9 +21,14 @@ Options:
                     top|new|best for front page items (default: top)
                     date|popularity for search result items (default: popularity)
     -q, --query     search query
+    -t, --tags      filter search results on specific tags (default: story)
 
 Notes:
-	The output for --style=csv is: id,type,by,timestamp,title,url,score,comments
+    The output for --style=csv is: id,type,by,timestamp,title,url,score,comments
+
+    Search tags are ANDed by default but can be ORed if between parentheses. For
+    example, "author_pg,(story,poll)" filters on "author_pg AND (type=story OR type=poll)".
+    See https://hn.algolia.com/api for more.
 `
 )
 
@@ -45,6 +50,9 @@ type Args struct {
 
 	// Search query for searching items via the Algolia API.
 	Query string
+
+	// Comma-separated list of tags for filtering search results.
+	Tags string
 }
 
 func ArgsFromCli() (Args, error) {
@@ -53,6 +61,7 @@ func ArgsFromCli() (Args, error) {
 	var stylestr string
 	var ranking string
 	var query string
+	var tags string
 
 	flag.Usage = func() { fmt.Print(usage) }
 	flag.BoolVar(&version, "v", false, "")
@@ -65,6 +74,9 @@ func ArgsFromCli() (Args, error) {
 	flag.StringVar(&stylestr, "style", "plain", "")
 	flag.StringVar(&query, "q", "", "")
 	flag.StringVar(&query, "query", "", "")
+	flag.StringVar(&tags, "t", "", "")
+	flag.StringVar(&tags, "tags", "", "")
+
 	flag.Parse()
 
 	var frontPageRanking *api.FrontPageItemsRanking
@@ -79,7 +91,7 @@ func ArgsFromCli() (Args, error) {
 		case "date":
 			searchResultsRanking = api.Date.ToPointer()
 		default:
-			return Args{}, fmt.Errorf("invalid search ranking: %s", ranking)
+			return Args{}, fmt.Errorf("invalid search ranking: %s\n", ranking)
 		}
 	} else {
 		// --query was not passed, interpret --ranking for front page.
@@ -93,8 +105,18 @@ func ArgsFromCli() (Args, error) {
 		case "best":
 			frontPageRanking = api.Best.ToPointer()
 		default:
-			return Args{}, fmt.Errorf("invalid front page ranking: %s", ranking)
+			return Args{}, fmt.Errorf("invalid front page ranking: %s\n", ranking)
 		}
+	}
+
+	if len(tags) > 0 {
+		// --tags only allowed if --query was also specified.
+		if len(query) == 0 {
+			return Args{}, fmt.Errorf("tags invalid without query\n")
+		}
+	} else if len(query) > 0 {
+		// Default to stories.
+		tags = "story"
 	}
 
 	var style formatting.Style
@@ -110,7 +132,7 @@ func ArgsFromCli() (Args, error) {
 	case "csv":
 		style = formatting.Csv
 	default:
-		return Args{}, fmt.Errorf("invalid style: %s", style)
+		return Args{}, fmt.Errorf("invalid style: %s\n", style)
 	}
 
 	return Args{
@@ -120,5 +142,6 @@ func ArgsFromCli() (Args, error) {
 		Limit:                limit,
 		Style:                style,
 		Query:                query,
+		Tags:                 tags,
 	}, nil
 }

@@ -48,6 +48,12 @@ func DisplayItems(items []api.Item, style formatting.Style) {
 			builder.WriteString(formatting.StoryOutput(&item, style, &clock))
 		case api.Poll:
 			builder.WriteString(formatting.PollOutput(&item, style, &clock))
+		case api.PollOpt:
+			builder.WriteString(formatting.PollOptOutput(&item, style, &clock))
+		case api.Comment:
+			builder.WriteString(formatting.CommentOutput(&item, style, &clock))
+		default:
+			panic(fmt.Sprintf("invalid item type %s", item.Type))
 		}
 	}
 	fmt.Print(builder.String())
@@ -68,7 +74,7 @@ func main() {
 	if len(args.Query) != 0 {
 		searchItems, err := FetchSearchItems(api.SearchRequest{
 			Query:   args.Query,
-			Tags:    []string{"story"},
+			Tags:    args.Tags,
 			Ranking: *args.RankingSearchResults,
 			Limit:   args.Limit,
 		})

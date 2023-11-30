@@ -6,7 +6,7 @@ import (
 	"io"
 	"net/http"
 	"net/url"
-	"strings"
+	"strconv"
 	"sync"
 )
 
@@ -176,7 +176,7 @@ func (hn *HnClient) Search(request SearchRequest) ([]ItemId, error) {
 		endpoint = hn.searchDateUrl
 	}
 	query := url.QueryEscape(request.Query)
-	tags := url.QueryEscape(strings.Join(request.Tags, ","))
+	tags := url.QueryEscape(request.Tags)
 	url := fmt.Sprintf("%s?query=%s&tags=%s&hitsPerPage=%d", endpoint, query, tags, request.Limit)
 	response, err := hn.client.Get(url)
 	if err != nil {
@@ -204,7 +204,11 @@ func (hn *HnClient) Search(request SearchRequest) ([]ItemId, error) {
 	}
 	ids := make([]ItemId, len(hits))
 	for i, hit := range hits {
-		ids[i] = hit.StoryId
+		id, err := strconv.Atoi(hit.Id)
+		if err != nil {
+			return nil, err
+		}
+		ids[i] = int32(id)
 	}
 	return ids, nil
 }

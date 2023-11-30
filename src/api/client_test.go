@@ -203,9 +203,9 @@ func TestSearchSucceedsIfServerReturns200(t *testing.T) {
 	server := httptest.NewServer(WithJsonResponse(`
 	{
 		"hits": [
-			{ "story_id": 123 },
-			{ "story_id": 456 },
-			{ "story_id": 789 }
+			{ "objectID": "123" },
+			{ "objectID": "456" },
+			{ "objectID": "789" }
 		]
 	}
 	`))
@@ -214,7 +214,7 @@ func TestSearchSucceedsIfServerReturns200(t *testing.T) {
 
 	items, err := client.Search(SearchRequest{
 		Query:   "query", // unimportant
-		Tags:    []string{"story"},
+		Tags:    "story",
 		Ranking: Popularity,
 		Limit:   30,
 	})
@@ -227,9 +227,9 @@ func TestSearchSucceedsWhenSortingByDate(t *testing.T) {
 	server := httptest.NewServer(WithJsonResponse(`
 	{
 		"hits": [
-			{ "story_id": 123 },
-			{ "story_id": 456 },
-			{ "story_id": 789 }
+			{ "objectID": "123" },
+			{ "objectID": "456" },
+			{ "objectID": "789" }
 		]
 	}
 	`))
@@ -238,7 +238,7 @@ func TestSearchSucceedsWhenSortingByDate(t *testing.T) {
 
 	items, err := client.Search(SearchRequest{
 		Query:   "query", // unimportant
-		Tags:    []string{"story"},
+		Tags:    "story",
 		Ranking: Date,
 		Limit:   30,
 	})
@@ -251,9 +251,9 @@ func TestSearchSucceedsWithMultiWordQuery(t *testing.T) {
 	server := httptest.NewServer(WithJsonResponse(`
 	{
 		"hits": [
-			{ "story_id": 123 },
-			{ "story_id": 456 },
-			{ "story_id": 789 }
+			{ "objectID": "123" },
+			{ "objectID": "456" },
+			{ "objectID": "789" }
 		]
 	}
 	`))
@@ -262,7 +262,7 @@ func TestSearchSucceedsWithMultiWordQuery(t *testing.T) {
 
 	items, err := client.Search(SearchRequest{
 		Query:   "multi word query",
-		Tags:    []string{"story"},
+		Tags:    "story",
 		Ranking: Popularity,
 		Limit:   30,
 	})
@@ -275,9 +275,9 @@ func TestSearchSucceedsWithALimitOfZero(t *testing.T) {
 	server := httptest.NewServer(WithJsonResponse(`
 	{
 		"hits": [
-			{ "story_id": 123 },
-			{ "story_id": 456 },
-			{ "story_id": 789 }
+			{ "objectID": "123" },
+			{ "objectID": "456" },
+			{ "objectID": "789" }
 		]
 	}
 	`))
@@ -286,7 +286,7 @@ func TestSearchSucceedsWithALimitOfZero(t *testing.T) {
 
 	items, err := client.Search(SearchRequest{
 		Query:   "query", // unimportant
-		Tags:    []string{"story"},
+		Tags:    "story",
 		Ranking: Popularity,
 		Limit:   0,
 	})
@@ -299,9 +299,9 @@ func TestSearchSucceedsWithALimitLessThanResponseSize(t *testing.T) {
 	server := httptest.NewServer(WithJsonResponse(`
 	{
 		"hits": [
-			{ "story_id": 123 },
-			{ "story_id": 456 },
-			{ "story_id": 789 }
+			{ "objectID": "123" },
+			{ "objectID": "456" },
+			{ "objectID": "789" }
 		]
 	}
 	`))
@@ -310,7 +310,7 @@ func TestSearchSucceedsWithALimitLessThanResponseSize(t *testing.T) {
 
 	items, err := client.Search(SearchRequest{
 		Query:   "query", // unimportant
-		Tags:    []string{"story"},
+		Tags:    "story",
 		Ranking: Popularity,
 		Limit:   1,
 	})
@@ -326,7 +326,7 @@ func TestSearchFailsWhenServerReturns500(t *testing.T) {
 
 	_, err := client.Search(SearchRequest{
 		Query:   "query", // unimportant
-		Tags:    []string{"story"},
+		Tags:    "story",
 		Ranking: Popularity,
 		Limit:   30,
 	})
@@ -356,7 +356,7 @@ func TestSearchFailsIfJsonCannotBeParsed(t *testing.T) {
 
 	_, err := client.Search(SearchRequest{
 		Query:   "query", // unimportant
-		Tags:    []string{"story"},
+		Tags:    "story",
 		Ranking: Popularity,
 		Limit:   30,
 	})

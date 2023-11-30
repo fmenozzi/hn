@@ -36,9 +36,14 @@ Options:
                     top|new|best for front page items (default: top)
                     date|popularity for search result items (default: popularity)
     -q, --query     search query
+    -t, --tags      filter search results on specific tags (default: story)
 
 Notes:
-	The output for --style=csv is: id,type,by,timestamp,title,url,score,comments
+    The output for --style=csv is: id,type,by,timestamp,title,url,score,comments
+
+    Search tags are ANDed by default but can be ORed if between parentheses. For
+    example, "author_pg,(story,poll)" filters on "author_pg AND (type=story OR type=poll)".
+    See https://hn.algolia.com/api for more.
 ```
 
 This code is licensed under the [GNU General Public License version 3](https://www.gnu.org/licenses/gpl-3.0.en.html).
