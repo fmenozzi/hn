@@ -79,9 +79,50 @@ func PollOutput(poll *api.Item, style Style, clock Clock) string {
 }
 
 func PollOptOutput(pollopt *api.Item, style Style, clock Clock) string {
-	return fmt.Sprintf("pollopt with id %d\n", pollopt.Id)
+	postUrl := fmt.Sprintf("%s%d", itemBaseUrl, pollopt.Id)
+	text := *pollopt.Text
+	time := GetRelativeTime(clock, time.Unix(*pollopt.Time, 0))
+	score := *pollopt.Score
+
+	// TODO: This is quite hacky but will do for now while we overhaul the UI.
+	if len(text) > 70 {
+		text = fmt.Sprintf("%s...", text[:70])
+	}
+
+	switch style {
+	case Plain:
+		return fmt.Sprintf("[%d pts] [%14s] [             ] %s\n", score, time, text)
+	case Markdown:
+		return fmt.Sprintf("* [%d pts] [%14s] [             ] [%s](%s)\n", score, time, text, postUrl)
+	case Csv:
+		// TODO: commas in text are not always respected, find a way around that.
+		return fmt.Sprintf("%d,pollopt,%s,%d,\"%s\",%s,%d,0\n", pollopt.Id, *pollopt.By, *pollopt.Time, *pollopt.Text, postUrl, score)
+	default:
+		panic(fmt.Sprintf("invalid style: %s\n", style))
+	}
 }
 
 func CommentOutput(comment *api.Item, style Style, clock Clock) string {
-	return fmt.Sprintf("comment with id %d\n", comment.Id)
+	postUrl := fmt.Sprintf("%s%d", itemBaseUrl, comment.Id)
+	text := *comment.Text
+	time := GetRelativeTime(clock, time.Unix(*comment.Time, 0))
+	score := 0
+	comments := len(comment.Kids)
+
+	// TODO: This is quite hacky but will do for now while we overhaul the UI.
+	if len(text) > 70 {
+		text = fmt.Sprintf("%s...", text[:70])
+	}
+
+	switch style {
+	case Plain:
+		return fmt.Sprintf("[        ] [%14s] [             ] %s\n", time, text)
+	case Markdown:
+		return fmt.Sprintf("* [        ] [%14s] [             ] [%s](%s)\n", time, text, postUrl)
+	case Csv:
+		// TODO: commas in text are not always respected, find a way around that.
+		return fmt.Sprintf("%d,comment,%s,%d,\"%s\",%s,%d,%d\n", comment.Id, *comment.By, *comment.Time, *comment.Text, postUrl, score, comments)
+	default:
+		panic(fmt.Sprintf("invalid style: %s\n", style))
+	}
 }
