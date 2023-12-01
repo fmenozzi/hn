@@ -75,11 +75,11 @@ func TestPlainOutput(t *testing.T) {
 	pollOptOutput := PollOptOutput(&pollopt, Plain, &fakeClock)
 	commentOutput := CommentOutput(&comment, Plain, &fakeClock)
 
-	expectedJobOutput := "[   1 pts] [   6 hours ago] [       HIRING] Job title\n"
-	expectedStoryOutput := "[  10 pts] [   12 days ago] [  20 comments] www.story.url\n"
-	expectedPollOutput := "[ 100 pts] [    40 min ago] [ 200 comments] https://news.ycombinator.com/item?id=3\n"
-	expectedPollOptOutput := "[1000 pts] [  3 months ago] [             ] Poll option text\n"
-	expectedCommentOutput := "[        ] [     a day ago] [             ] Comment text\n"
+	expectedJobOutput := "HIRING: https://news.ycombinator.com/item?id=1\n└─── 1 pts 6 hours ago\n"
+	expectedStoryOutput := "www.story.url\n└─── 10 pts by storyuser 12 days ago | 20 comments\n"
+	expectedPollOutput := "https://news.ycombinator.com/item?id=3\n└─── 100 pts by polluser 40 min ago | 200 comments\n"
+	expectedPollOptOutput := "Poll option text\n└─── 1000 pts by polloptuser 3 months ago\n"
+	expectedCommentOutput := "Comment text\n└─── by commentuser a day ago | 4 replies\n"
 
 	assert.Equal(t, expectedJobOutput, jobOutput)
 	assert.Equal(t, expectedStoryOutput, storyOutput)
@@ -95,11 +95,11 @@ func TestMarkdownOutput(t *testing.T) {
 	pollOptOutput := PollOptOutput(&pollopt, Markdown, &fakeClock)
 	commentOutput := CommentOutput(&comment, Markdown, &fakeClock)
 
-	expectedJobOutput := "* [   1 pts] [   6 hours ago] [       [HIRING](https://news.ycombinator.com/item?id=1)] [Job title](https://news.ycombinator.com/item?id=1)\n"
-	expectedStoryOutput := "* [  10 pts] [   12 days ago] [[  20 comments](https://news.ycombinator.com/item?id=2)] [Story title](www.story.url)\n"
-	expectedPollOutput := "* [ 100 pts] [    40 min ago] [[ 200 comments](https://news.ycombinator.com/item?id=3)] [Poll title](https://news.ycombinator.com/item?id=3)\n"
-	expectedPollOptOutput := "* [1000 pts] [  3 months ago] [             ] [Poll option text](https://news.ycombinator.com/item?id=4)\n"
-	expectedCommentOutput := "* [        ] [     a day ago] [             ] [Comment text](https://news.ycombinator.com/item?id=5)\n"
+	expectedJobOutput := "* **[HIRING: Job title](https://news.ycombinator.com/item?id=1)**\n* └─── 1 pts 6 hours ago\n"
+	expectedStoryOutput := "* **[Story title](www.story.url)**\n* └─── 10 pts by [storyuser](https://news.ycombinator.com/user?id=storyuser) 12 days ago | [20 comments](https://news.ycombinator.com/item?id=2)\n"
+	expectedPollOutput := "* **[Poll title](https://news.ycombinator.com/item?id=3)**\n* └─── 100 pts by [polluser](https://news.ycombinator.com/user?id=polluser) 40 min ago | [200 comments](https://news.ycombinator.com/item?id=3)\n"
+	expectedPollOptOutput := "* **[Poll option text](https://news.ycombinator.com/item?id=4)**\n* └─── 1000 pts by [polloptuser](https://news.ycombinator.com/user?id=polloptuser) 3 months ago\n"
+	expectedCommentOutput := "* *[Comment text](https://news.ycombinator.com/item?id=5)*\n* └─── by [commentuser](https://news.ycombinator.com/user?id=commentuser) a day ago | [4 replies](https://news.ycombinator.com/item?id=5)\n"
 
 	assert.Equal(t, expectedJobOutput, jobOutput)
 	assert.Equal(t, expectedStoryOutput, storyOutput)
