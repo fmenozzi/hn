@@ -1,6 +1,7 @@
 package formatting
 
 import (
+	"fmt"
 	"testing"
 	"time"
 
@@ -75,7 +76,7 @@ func TestPlainOutput(t *testing.T) {
 	pollOptOutput := PollOptOutput(&pollopt, Plain, &fakeClock)
 	commentOutput := CommentOutput(&comment, Plain, &fakeClock)
 
-	expectedJobOutput := "HIRING: https://news.ycombinator.com/item?id=1\n└─── 1 pts 6 hours ago\n"
+	expectedJobOutput := "HIRING: https://news.ycombinator.com/item?id=1\n└─── 1 pt 6 hours ago\n"
 	expectedStoryOutput := "www.story.url\n└─── 10 pts by storyuser 12 days ago | 20 comments\n"
 	expectedPollOutput := "https://news.ycombinator.com/item?id=3\n└─── 100 pts by polluser 40 min ago | 200 comments\n"
 	expectedPollOptOutput := "Poll option text\n└─── 1000 pts by polloptuser 3 months ago\n"
@@ -95,7 +96,7 @@ func TestMarkdownOutput(t *testing.T) {
 	pollOptOutput := PollOptOutput(&pollopt, Markdown, &fakeClock)
 	commentOutput := CommentOutput(&comment, Markdown, &fakeClock)
 
-	expectedJobOutput := "* **[HIRING: Job title](https://news.ycombinator.com/item?id=1)**\n* └─── 1 pts 6 hours ago\n"
+	expectedJobOutput := "* **[HIRING: Job title](https://news.ycombinator.com/item?id=1)**\n* └─── 1 pt 6 hours ago\n"
 	expectedStoryOutput := "* **[Story title](www.story.url)**\n* └─── 10 pts by [storyuser](https://news.ycombinator.com/user?id=storyuser) 12 days ago | [20 comments](https://news.ycombinator.com/item?id=2)\n"
 	expectedPollOutput := "* **[Poll title](https://news.ycombinator.com/item?id=3)**\n* └─── 100 pts by [polluser](https://news.ycombinator.com/user?id=polluser) 40 min ago | [200 comments](https://news.ycombinator.com/item?id=3)\n"
 	expectedPollOptOutput := "* **[Poll option text](https://news.ycombinator.com/item?id=4)**\n* └─── 1000 pts by [polloptuser](https://news.ycombinator.com/user?id=polloptuser) 3 months ago\n"
@@ -129,7 +130,7 @@ func TestCsvOutput(t *testing.T) {
 }
 
 func TestStoryWithoutUrlFallbackToPostUrl(t *testing.T) {
-	story = api.Item{
+	story := api.Item{
 		Id:          2,
 		Score:       intptr(10),
 		By:          ptr("storyuser"),
@@ -143,4 +144,37 @@ func TestStoryWithoutUrlFallbackToPostUrl(t *testing.T) {
 	expectedStoryOutput := "2,story,storyuser,8963200,\"Story title\",https://news.ycombinator.com/item?id=2,10,20\n"
 
 	assert.Equal(t, expectedStoryOutput, storyOutput)
+}
+
+func TestSingularOutput(t *testing.T) {
+	job, story, poll, pollopt, comment := job, story, poll, pollopt, comment
+
+	job.Score = intptr(1)
+	story.Score = intptr(1)
+	story.Descendants = intptr(1)
+	poll.Score = intptr(1)
+	poll.Descendants = intptr(1)
+	pollopt.Score = intptr(1)
+	comment.Kids = []api.ItemId{3}
+
+	fmt.Printf("story: %v\n", story)
+	fmt.Printf("story.Url: %v\n", story.Url)
+
+	jobOutput := JobOutput(&job, Plain, &fakeClock)
+	storyOutput := StoryOutput(&story, Plain, &fakeClock)
+	pollOutput := PollOutput(&poll, Plain, &fakeClock)
+	pollOptOutput := PollOptOutput(&pollopt, Plain, &fakeClock)
+	commentOutput := CommentOutput(&comment, Plain, &fakeClock)
+
+	expectedJobOutput := "HIRING: https://news.ycombinator.com/item?id=1\n└─── 1 pt 6 hours ago\n"
+	expectedStoryOutput := "www.story.url\n└─── 1 pt by storyuser 12 days ago | 1 comment\n"
+	expectedPollOutput := "https://news.ycombinator.com/item?id=3\n└─── 1 pt by polluser 40 min ago | 1 comment\n"
+	expectedPollOptOutput := "Poll option text\n└─── 1 pt by polloptuser 3 months ago\n"
+	expectedCommentOutput := "Comment text\n└─── by commentuser a day ago | 1 reply\n"
+
+	assert.Equal(t, expectedJobOutput, jobOutput)
+	assert.Equal(t, expectedStoryOutput, storyOutput)
+	assert.Equal(t, expectedPollOutput, pollOutput)
+	assert.Equal(t, expectedPollOptOutput, pollOptOutput)
+	assert.Equal(t, expectedCommentOutput, commentOutput)
 }
