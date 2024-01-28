@@ -3,7 +3,7 @@ A simple commandline hacker news client.
 Features:
 * Browse the front page anonymously (i.e. no login) and sort by new, hot, best
 * Search for stories via the Algolia API and sort by date, popularity
-* Format output for terminal markdown viewing (via e.g. [`mdcat`](https://github.com/swsnr/mdcat)) or csv
+* Format output for terminal markdown viewing (via e.g. [`mdcat`](https://github.com/swsnr/mdcat))
     * Markdown via `mdcat` et al only possible on supported terminals (e.g. [`kitty`](https://sw.kovidgoyal.net/kitty/), [`iTerm2`](https://iterm2.com/))
 
 Examples:
@@ -19,10 +19,10 @@ Examples:
   hn --ranking new --limit 50 --style markdown | mdcat
   ```
   
-* Search for stories containing "foobar" ranked by date and format output as csv:
+* Search for stories containing "foobar" ranked by date:
 
   ```sh
-  hn --query "foobar" --ranking date --style csv
+  hn --query "foobar" --ranking date
   ```
 
 Full CLI:
@@ -31,7 +31,7 @@ Options:
     -h, --help      show this help message and exit
     -v, --version   show program version information and exit
     -l, --limit     max number of results to fetch (default: 30)
-    -s, --style     output style, one of plain|markdown|md|csv (default: plain)
+    -s, --style     output style, one of plain|markdown|md (default: plain)
     -r, --ranking   ranking method
                     top|new|best for front page items (default: top)
                     date|popularity for search result items (default: popularity)
@@ -39,8 +39,6 @@ Options:
     -t, --tags      filter search results on specific tags (default: story)
 
 Notes:
-    The output for --style=csv is: id,type,by,timestamp,title,url,score,comments
-
     Search tags are ANDed by default but can be ORed if between parentheses. For
     example, "author_pg,(story,poll)" filters on "author_pg AND (type=story OR type=poll)".
     See https://hn.algolia.com/api for more.

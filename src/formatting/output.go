@@ -17,7 +17,6 @@ type Style string
 const (
 	Plain    Style = "plain"
 	Markdown       = "markdown"
-	Csv            = "csv"
 )
 
 func JobOutput(job *api.Item, style Style, clock Clock) string {
@@ -36,8 +35,6 @@ func JobOutput(job *api.Item, style Style, clock Clock) string {
 		return fmt.Sprintf("HIRING: %s\n└─── %d %s %s\n", postUrl, score, ptsstr, time)
 	case Markdown:
 		return fmt.Sprintf("* **[HIRING: %s](%s)**\n* └─── %d %s %s\n", title, postUrl, score, ptsstr, time)
-	case Csv:
-		return fmt.Sprintf("%d,job,%s,%d,\"%s\",%s,%d,0\n", job.Id, *job.By, *job.Time, title, postUrl, score)
 	default:
 		panic(fmt.Sprintf("invalid style: %s\n", style))
 	}
@@ -71,8 +68,6 @@ func StoryOutput(story *api.Item, style Style, clock Clock) string {
 		return fmt.Sprintf("%s\n└─── %d %s by %s %s | %d %s\n", url, score, ptsstr, by, time, comments, commentsstr)
 	case Markdown:
 		return fmt.Sprintf("* **[%s](%s)**\n* └─── %d %s by [%s](%s) %s | [%d %s](%s)\n", title, url, score, ptsstr, by, byUrl, time, comments, commentsstr, postUrl)
-	case Csv:
-		return fmt.Sprintf("%d,story,%s,%d,\"%s\",%s,%d,%d\n", story.Id, *story.By, *story.Time, title, url, score, comments)
 	default:
 		panic(fmt.Sprintf("invalid style: %s\n", style))
 	}
@@ -101,8 +96,6 @@ func PollOutput(poll *api.Item, style Style, clock Clock) string {
 		return fmt.Sprintf("%s\n└─── %d %s by %s %s | %d %s\n", postUrl, score, ptsstr, by, time, comments, commentsstr)
 	case Markdown:
 		return fmt.Sprintf("* **[%s](%s)**\n* └─── %d %s by [%s](%s) %s | [%d %s](%s)\n", title, postUrl, score, ptsstr, by, byUrl, time, comments, commentsstr, postUrl)
-	case Csv:
-		return fmt.Sprintf("%d,poll,%s,%d,\"%s\",%s,%d,%d\n", poll.Id, *poll.By, *poll.Time, title, postUrl, score, comments)
 	default:
 		panic(fmt.Sprintf("invalid style: %s\n", style))
 	}
@@ -131,9 +124,6 @@ func PollOptOutput(pollopt *api.Item, style Style, clock Clock) string {
 		return fmt.Sprintf("%s\n└─── %d %s by %s %s\n", text, score, ptsstr, by, time)
 	case Markdown:
 		return fmt.Sprintf("* **[%s](%s)**\n* └─── %d %s by [%s](%s) %s\n", text, postUrl, score, ptsstr, by, byUrl, time)
-	case Csv:
-		// TODO: commas in text are not always respected, find a way around that.
-		return fmt.Sprintf("%d,pollopt,%s,%d,\"%s\",%s,%d,0\n", pollopt.Id, *pollopt.By, *pollopt.Time, *pollopt.Text, postUrl, score)
 	default:
 		panic(fmt.Sprintf("invalid style: %s\n", style))
 	}
@@ -145,7 +135,6 @@ func CommentOutput(comment *api.Item, style Style, clock Clock) string {
 	byUrl := fmt.Sprintf("%s%s", userBaseUrl, by)
 	text := *comment.Text
 	time := GetRelativeTime(clock, time.Unix(*comment.Time, 0))
-	score := 0
 	comments := len(comment.Kids)
 	repliesstr := "replies"
 
@@ -163,9 +152,6 @@ func CommentOutput(comment *api.Item, style Style, clock Clock) string {
 		return fmt.Sprintf("%s\n└─── by %s %s | %d %s\n", text, by, time, comments, repliesstr)
 	case Markdown:
 		return fmt.Sprintf("* *[%s](%s)*\n* └─── by [%s](%s) %s | [%d %s](%s)\n", text, postUrl, by, byUrl, time, comments, repliesstr, postUrl)
-	case Csv:
-		// TODO: commas in text are not always respected, find a way around that.
-		return fmt.Sprintf("%d,comment,%s,%d,\"%s\",%s,%d,%d\n", comment.Id, *comment.By, *comment.Time, *comment.Text, postUrl, score, comments)
 	default:
 		panic(fmt.Sprintf("invalid style: %s\n", style))
 	}

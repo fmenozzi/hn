@@ -109,26 +109,6 @@ func TestMarkdownOutput(t *testing.T) {
 	assert.Equal(t, expectedCommentOutput, commentOutput)
 }
 
-func TestCsvOutput(t *testing.T) {
-	jobOutput := JobOutput(&job, Csv, &fakeClock)
-	storyOutput := StoryOutput(&story, Csv, &fakeClock)
-	pollOutput := PollOutput(&poll, Csv, &fakeClock)
-	pollOptOutput := PollOptOutput(&pollopt, Csv, &fakeClock)
-	commentOutput := CommentOutput(&comment, Csv, &fakeClock)
-
-	expectedJobOutput := "1,job,jobuser,9978400,\"Job title\",https://news.ycombinator.com/item?id=1,1,0\n"
-	expectedStoryOutput := "2,story,storyuser,8963200,\"Story title\",www.story.url,10,20\n"
-	expectedPollOutput := "3,poll,polluser,9997600,\"Poll title\",https://news.ycombinator.com/item?id=3,100,200\n"
-	expectedPollOptOutput := "4,pollopt,polloptuser,2224000,\"Poll option text\",https://news.ycombinator.com/item?id=4,1000,0\n"
-	expectedCommentOutput := "5,comment,commentuser,9913600,\"Comment text\",https://news.ycombinator.com/item?id=5,0,4\n"
-
-	assert.Equal(t, expectedJobOutput, jobOutput)
-	assert.Equal(t, expectedStoryOutput, storyOutput)
-	assert.Equal(t, expectedPollOutput, pollOutput)
-	assert.Equal(t, expectedPollOptOutput, pollOptOutput)
-	assert.Equal(t, expectedCommentOutput, commentOutput)
-}
-
 func TestStoryWithoutUrlFallbackToPostUrl(t *testing.T) {
 	story := api.Item{
 		Id:          2,
@@ -139,9 +119,9 @@ func TestStoryWithoutUrlFallbackToPostUrl(t *testing.T) {
 		Title:       ptr("Story title"),
 	}
 
-	storyOutput := StoryOutput(&story, Csv, &fakeClock)
+	storyOutput := StoryOutput(&story, Plain, &fakeClock)
 
-	expectedStoryOutput := "2,story,storyuser,8963200,\"Story title\",https://news.ycombinator.com/item?id=2,10,20\n"
+	expectedStoryOutput := "https://news.ycombinator.com/item?id=2\n└─── 10 pts by storyuser 12 days ago | 20 comments\n"
 
 	assert.Equal(t, expectedStoryOutput, storyOutput)
 }
