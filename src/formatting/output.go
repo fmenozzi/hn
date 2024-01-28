@@ -1,6 +1,7 @@
 package formatting
 
 import (
+	"encoding/json"
 	"fmt"
 	"strings"
 	"time"
@@ -18,6 +19,7 @@ type Style string
 const (
 	Plain    Style = "plain"
 	Markdown       = "markdown"
+	Json           = "json"
 )
 
 func DisplayPlain(items []api.Item, clock Clock) string {
@@ -26,6 +28,19 @@ func DisplayPlain(items []api.Item, clock Clock) string {
 
 func DisplayMarkdown(items []api.Item, clock Clock) string {
 	return display(items, Markdown, clock)
+}
+
+func DisplayJson(items []api.Item) string {
+	// Note that we do not do any post-fetch formatting of output here: this is
+	// basically a one-to-one mapping of the Item data as fetched. For example,
+	// we do not fall back to post urls if the item does not have a url, and the
+	// time is represented as the original Unix timestamp instead of the human-
+	// readable relative time.
+	bytes, err := json.MarshalIndent(items, "", "\t")
+	if err != nil {
+		panic(fmt.Sprintf("error formatting items as json: %s", err.Error()))
+	}
+	return string(bytes)
 }
 
 func display(items []api.Item, style Style, clock Clock) string {

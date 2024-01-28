@@ -16,7 +16,7 @@ Options:
     -h, --help      show this help message and exit
     -v, --version   show program version information and exit
     -l, --limit     max number of results to fetch (default: 30)
-    -s, --style     output style, one of plain|markdown|md (default: plain)
+    -s, --style     output style, one of plain|markdown|md|json (default: plain)
     -r, --ranking   ranking method
                     top|new|best for front page items (default: top)
                     date|popularity for search result items (default: popularity)
@@ -127,6 +127,8 @@ func ArgsFromCli() (Args, error) {
 		fallthrough
 	case "markdown":
 		style = formatting.Markdown
+	case "json":
+		style = formatting.Json
 	default:
 		return Args{}, fmt.Errorf("invalid style: %s\n", stylestr)
 	}

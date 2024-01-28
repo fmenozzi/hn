@@ -46,6 +46,8 @@ func DisplayItems(items []api.Item, style formatting.Style) {
 		fmt.Print(formatting.DisplayPlain(items, &clock))
 	case formatting.Markdown:
 		fmt.Print(formatting.DisplayMarkdown(items, &clock))
+	case formatting.Json:
+		fmt.Print(formatting.DisplayJson(items))
 	default:
 		panic(fmt.Sprintf("invalid style: %s\n", style))
 	}

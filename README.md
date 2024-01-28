@@ -5,6 +5,8 @@ Features:
 * Search for stories via the Algolia API and sort by date, popularity
 * Format output for terminal markdown viewing (via e.g. [`mdcat`](https://github.com/swsnr/mdcat))
     * Markdown via `mdcat` et al only possible on supported terminals (e.g. [`kitty`](https://sw.kovidgoyal.net/kitty/), [`iTerm2`](https://iterm2.com/))
+* Format output in json for scripting
+    * See [here](https://github.com/HackerNews/API) for API details
 
 Examples:
 * Get top 30 stories on the front page:
@@ -19,10 +21,10 @@ Examples:
   hn --ranking new --limit 50 --style markdown | mdcat
   ```
   
-* Search for stories containing "foobar" ranked by date:
+* Search for stories containing "foobar" ranked by date and output as json:
 
   ```sh
-  hn --query "foobar" --ranking date
+  hn --query "foobar" --ranking date --style json
   ```
 
 Full CLI:
@@ -31,7 +33,7 @@ Options:
     -h, --help      show this help message and exit
     -v, --version   show program version information and exit
     -l, --limit     max number of results to fetch (default: 30)
-    -s, --style     output style, one of plain|markdown|md (default: plain)
+    -s, --style     output style, one of plain|markdown|md|json (default: plain)
     -r, --ranking   ranking method
                     top|new|best for front page items (default: top)
                     date|popularity for search result items (default: popularity)

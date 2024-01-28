@@ -27,6 +27,7 @@ var (
 
 	job = api.Item{
 		Id:    1,
+		Type:  api.Job,
 		Score: intptr(1),
 		By:    ptr("jobuser"),
 		Time:  ptr(now.Add(-6 * time.Hour).Unix()), // 6 hours ago
@@ -35,6 +36,7 @@ var (
 
 	story = api.Item{
 		Id:          2,
+		Type:        api.Story,
 		Score:       intptr(10),
 		By:          ptr("storyuser"),
 		Time:        ptr(now.Add(-12 * 24 * time.Hour).Unix()), // 12 days ago
@@ -45,6 +47,7 @@ var (
 
 	poll = api.Item{
 		Id:          3,
+		Type:        api.Poll,
 		Score:       intptr(100),
 		By:          ptr("polluser"),
 		Time:        ptr(now.Add(-40 * time.Minute).Unix()), // 40 minutes ago
@@ -54,6 +57,7 @@ var (
 
 	pollopt = api.Item{
 		Id:    4,
+		Type:  api.PollOpt,
 		Score: intptr(1000),
 		By:    ptr("polloptuser"),
 		Time:  ptr(now.Add(-3 * 30 * 24 * time.Hour).Unix()), // 3 months ago
@@ -62,6 +66,7 @@ var (
 
 	comment = api.Item{
 		Id:   5,
+		Type: api.Comment,
 		By:   ptr("commentuser"),
 		Time: ptr(now.Add(-1 * 24 * time.Hour).Unix()), // a day ago
 		Text: ptr("Comment text"),
@@ -107,6 +112,104 @@ func TestMarkdownOutput(t *testing.T) {
 	assert.Equal(t, expectedPollOutput, pollOutput)
 	assert.Equal(t, expectedpollOptOutput, pollOptOutput)
 	assert.Equal(t, expectedcommentOutput, commentOutput)
+}
+
+func TestJsonOutput(t *testing.T) {
+	jsonOutput := DisplayJson([]api.Item{job, story, poll, pollopt, comment})
+
+	expectedJsonOutput := `[
+	{
+		"id": 1,
+		"deleted": null,
+		"type": "job",
+		"by": "jobuser",
+		"time": 9978400,
+		"text": null,
+		"dead": null,
+		"parent": null,
+		"poll": null,
+		"kids": null,
+		"url": null,
+		"score": 1,
+		"title": "Job title",
+		"parts": null,
+		"descendants": null
+	},
+	{
+		"id": 2,
+		"deleted": null,
+		"type": "story",
+		"by": "storyuser",
+		"time": 8963200,
+		"text": null,
+		"dead": null,
+		"parent": null,
+		"poll": null,
+		"kids": null,
+		"url": "www.story.url",
+		"score": 10,
+		"title": "Story title",
+		"parts": null,
+		"descendants": 20
+	},
+	{
+		"id": 3,
+		"deleted": null,
+		"type": "poll",
+		"by": "polluser",
+		"time": 9997600,
+		"text": null,
+		"dead": null,
+		"parent": null,
+		"poll": null,
+		"kids": null,
+		"url": null,
+		"score": 100,
+		"title": "Poll title",
+		"parts": null,
+		"descendants": 200
+	},
+	{
+		"id": 4,
+		"deleted": null,
+		"type": "pollopt",
+		"by": "polloptuser",
+		"time": 2224000,
+		"text": "Poll option text",
+		"dead": null,
+		"parent": null,
+		"poll": null,
+		"kids": null,
+		"url": null,
+		"score": 1000,
+		"title": null,
+		"parts": null,
+		"descendants": null
+	},
+	{
+		"id": 5,
+		"deleted": null,
+		"type": "comment",
+		"by": "commentuser",
+		"time": 9913600,
+		"text": "Comment text",
+		"dead": null,
+		"parent": null,
+		"poll": null,
+		"kids": [
+			6,
+			7,
+			8,
+			9
+		],
+		"url": null,
+		"score": null,
+		"title": null,
+		"parts": null,
+		"descendants": null
+	}
+]`
+	assert.Equal(t, expectedJsonOutput, jsonOutput)
 }
 
 func TestStoryWithoutUrlFallbackToPostUrl(t *testing.T) {
