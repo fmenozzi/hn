@@ -70,43 +70,43 @@ var (
 )
 
 func TestPlainOutput(t *testing.T) {
-	jobOutput := JobOutput(&job, Plain, &fakeClock)
-	storyOutput := StoryOutput(&story, Plain, &fakeClock)
-	pollOutput := PollOutput(&poll, Plain, &fakeClock)
-	pollOptOutput := PollOptOutput(&pollopt, Plain, &fakeClock)
-	commentOutput := CommentOutput(&comment, Plain, &fakeClock)
+	jobOutput := jobOutput(&job, Plain, &fakeClock)
+	storyOutput := storyOutput(&story, Plain, &fakeClock)
+	pollOutput := pollOutput(&poll, Plain, &fakeClock)
+	pollOptOutput := pollOptOutput(&pollopt, Plain, &fakeClock)
+	commentOutput := commentOutput(&comment, Plain, &fakeClock)
 
 	expectedJobOutput := "HIRING: https://news.ycombinator.com/item?id=1\n└─── 1 pt 6 hours ago\n"
 	expectedStoryOutput := "www.story.url\n└─── 10 pts by storyuser 12 days ago | 20 comments\n"
 	expectedPollOutput := "https://news.ycombinator.com/item?id=3\n└─── 100 pts by polluser 40 min ago | 200 comments\n"
-	expectedPollOptOutput := "Poll option text\n└─── 1000 pts by polloptuser 3 months ago\n"
-	expectedCommentOutput := "Comment text\n└─── by commentuser a day ago | 4 replies\n"
+	expectedpollOptOutput := "Poll option text\n└─── 1000 pts by polloptuser 3 months ago\n"
+	expectedcommentOutput := "Comment text\n└─── by commentuser a day ago | 4 replies\n"
 
 	assert.Equal(t, expectedJobOutput, jobOutput)
 	assert.Equal(t, expectedStoryOutput, storyOutput)
 	assert.Equal(t, expectedPollOutput, pollOutput)
-	assert.Equal(t, expectedPollOptOutput, pollOptOutput)
-	assert.Equal(t, expectedCommentOutput, commentOutput)
+	assert.Equal(t, expectedpollOptOutput, pollOptOutput)
+	assert.Equal(t, expectedcommentOutput, commentOutput)
 }
 
 func TestMarkdownOutput(t *testing.T) {
-	jobOutput := JobOutput(&job, Markdown, &fakeClock)
-	storyOutput := StoryOutput(&story, Markdown, &fakeClock)
-	pollOutput := PollOutput(&poll, Markdown, &fakeClock)
-	pollOptOutput := PollOptOutput(&pollopt, Markdown, &fakeClock)
-	commentOutput := CommentOutput(&comment, Markdown, &fakeClock)
+	jobOutput := jobOutput(&job, Markdown, &fakeClock)
+	storyOutput := storyOutput(&story, Markdown, &fakeClock)
+	pollOutput := pollOutput(&poll, Markdown, &fakeClock)
+	pollOptOutput := pollOptOutput(&pollopt, Markdown, &fakeClock)
+	commentOutput := commentOutput(&comment, Markdown, &fakeClock)
 
 	expectedJobOutput := "* **[HIRING: Job title](https://news.ycombinator.com/item?id=1)**\n* └─── 1 pt 6 hours ago\n"
 	expectedStoryOutput := "* **[Story title](www.story.url)**\n* └─── 10 pts by [storyuser](https://news.ycombinator.com/user?id=storyuser) 12 days ago | [20 comments](https://news.ycombinator.com/item?id=2)\n"
 	expectedPollOutput := "* **[Poll title](https://news.ycombinator.com/item?id=3)**\n* └─── 100 pts by [polluser](https://news.ycombinator.com/user?id=polluser) 40 min ago | [200 comments](https://news.ycombinator.com/item?id=3)\n"
-	expectedPollOptOutput := "* **[Poll option text](https://news.ycombinator.com/item?id=4)**\n* └─── 1000 pts by [polloptuser](https://news.ycombinator.com/user?id=polloptuser) 3 months ago\n"
-	expectedCommentOutput := "* *[Comment text](https://news.ycombinator.com/item?id=5)*\n* └─── by [commentuser](https://news.ycombinator.com/user?id=commentuser) a day ago | [4 replies](https://news.ycombinator.com/item?id=5)\n"
+	expectedpollOptOutput := "* **[Poll option text](https://news.ycombinator.com/item?id=4)**\n* └─── 1000 pts by [polloptuser](https://news.ycombinator.com/user?id=polloptuser) 3 months ago\n"
+	expectedcommentOutput := "* *[Comment text](https://news.ycombinator.com/item?id=5)*\n* └─── by [commentuser](https://news.ycombinator.com/user?id=commentuser) a day ago | [4 replies](https://news.ycombinator.com/item?id=5)\n"
 
 	assert.Equal(t, expectedJobOutput, jobOutput)
 	assert.Equal(t, expectedStoryOutput, storyOutput)
 	assert.Equal(t, expectedPollOutput, pollOutput)
-	assert.Equal(t, expectedPollOptOutput, pollOptOutput)
-	assert.Equal(t, expectedCommentOutput, commentOutput)
+	assert.Equal(t, expectedpollOptOutput, pollOptOutput)
+	assert.Equal(t, expectedcommentOutput, commentOutput)
 }
 
 func TestStoryWithoutUrlFallbackToPostUrl(t *testing.T) {
@@ -119,7 +119,7 @@ func TestStoryWithoutUrlFallbackToPostUrl(t *testing.T) {
 		Title:       ptr("Story title"),
 	}
 
-	storyOutput := StoryOutput(&story, Plain, &fakeClock)
+	storyOutput := storyOutput(&story, Plain, &fakeClock)
 
 	expectedStoryOutput := "https://news.ycombinator.com/item?id=2\n└─── 10 pts by storyuser 12 days ago | 20 comments\n"
 
@@ -140,21 +140,21 @@ func TestSingularOutput(t *testing.T) {
 	fmt.Printf("story: %v\n", story)
 	fmt.Printf("story.Url: %v\n", story.Url)
 
-	jobOutput := JobOutput(&job, Plain, &fakeClock)
-	storyOutput := StoryOutput(&story, Plain, &fakeClock)
-	pollOutput := PollOutput(&poll, Plain, &fakeClock)
-	pollOptOutput := PollOptOutput(&pollopt, Plain, &fakeClock)
-	commentOutput := CommentOutput(&comment, Plain, &fakeClock)
+	jobOutput := jobOutput(&job, Plain, &fakeClock)
+	storyOutput := storyOutput(&story, Plain, &fakeClock)
+	pollOutput := pollOutput(&poll, Plain, &fakeClock)
+	pollOptOutput := pollOptOutput(&pollopt, Plain, &fakeClock)
+	commentOutput := commentOutput(&comment, Plain, &fakeClock)
 
 	expectedJobOutput := "HIRING: https://news.ycombinator.com/item?id=1\n└─── 1 pt 6 hours ago\n"
 	expectedStoryOutput := "www.story.url\n└─── 1 pt by storyuser 12 days ago | 1 comment\n"
 	expectedPollOutput := "https://news.ycombinator.com/item?id=3\n└─── 1 pt by polluser 40 min ago | 1 comment\n"
-	expectedPollOptOutput := "Poll option text\n└─── 1 pt by polloptuser 3 months ago\n"
-	expectedCommentOutput := "Comment text\n└─── by commentuser a day ago | 1 reply\n"
+	expectedpollOptOutput := "Poll option text\n└─── 1 pt by polloptuser 3 months ago\n"
+	expectedcommentOutput := "Comment text\n└─── by commentuser a day ago | 1 reply\n"
 
 	assert.Equal(t, expectedJobOutput, jobOutput)
 	assert.Equal(t, expectedStoryOutput, storyOutput)
 	assert.Equal(t, expectedPollOutput, pollOutput)
-	assert.Equal(t, expectedPollOptOutput, pollOptOutput)
-	assert.Equal(t, expectedCommentOutput, commentOutput)
+	assert.Equal(t, expectedpollOptOutput, pollOptOutput)
+	assert.Equal(t, expectedcommentOutput, commentOutput)
 }

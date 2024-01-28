@@ -3,14 +3,11 @@ package main
 import (
 	"fmt"
 	"os"
-	"strings"
 
 	"github.com/fmenozzi/hn/src/api"
 	"github.com/fmenozzi/hn/src/cli"
 	"github.com/fmenozzi/hn/src/formatting"
 )
-
-var clock formatting.RealClock
 
 func FetchFrontPageItems(ranking api.FrontPageItemsRanking, limit int) ([]api.Item, error) {
 	client := api.MakeProdClient()
@@ -43,24 +40,15 @@ func FetchSearchItems(request api.SearchRequest) ([]api.Item, error) {
 }
 
 func DisplayItems(items []api.Item, style formatting.Style) {
-	var builder strings.Builder
-	for _, item := range items {
-		switch item.Type {
-		case api.Job:
-			builder.WriteString(formatting.JobOutput(&item, style, &clock))
-		case api.Story:
-			builder.WriteString(formatting.StoryOutput(&item, style, &clock))
-		case api.Poll:
-			builder.WriteString(formatting.PollOutput(&item, style, &clock))
-		case api.PollOpt:
-			builder.WriteString(formatting.PollOptOutput(&item, style, &clock))
-		case api.Comment:
-			builder.WriteString(formatting.CommentOutput(&item, style, &clock))
-		default:
-			panic(fmt.Sprintf("invalid item type %s", item.Type))
-		}
+	var clock formatting.RealClock
+	switch style {
+	case formatting.Plain:
+		fmt.Print(formatting.DisplayPlain(items, &clock))
+	case formatting.Markdown:
+		fmt.Print(formatting.DisplayMarkdown(items, &clock))
+	default:
+		panic(fmt.Sprintf("invalid style: %s\n", style))
 	}
-	fmt.Print(builder.String())
 }
 
 func main() {

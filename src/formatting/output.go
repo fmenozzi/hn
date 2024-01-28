@@ -2,6 +2,7 @@ package formatting
 
 import (
 	"fmt"
+	"strings"
 	"time"
 
 	"github.com/fmenozzi/hn/src/api"
@@ -19,7 +20,36 @@ const (
 	Markdown       = "markdown"
 )
 
-func JobOutput(job *api.Item, style Style, clock Clock) string {
+func DisplayPlain(items []api.Item, clock Clock) string {
+	return display(items, Plain, clock)
+}
+
+func DisplayMarkdown(items []api.Item, clock Clock) string {
+	return display(items, Markdown, clock)
+}
+
+func display(items []api.Item, style Style, clock Clock) string {
+	var builder strings.Builder
+	for _, item := range items {
+		switch item.Type {
+		case api.Job:
+			builder.WriteString(jobOutput(&item, style, clock))
+		case api.Story:
+			builder.WriteString(storyOutput(&item, style, clock))
+		case api.Poll:
+			builder.WriteString(pollOutput(&item, style, clock))
+		case api.PollOpt:
+			builder.WriteString(pollOptOutput(&item, style, clock))
+		case api.Comment:
+			builder.WriteString(commentOutput(&item, style, clock))
+		default:
+			panic(fmt.Sprintf("invalid item type %s", item.Type))
+		}
+	}
+	return builder.String()
+}
+
+func jobOutput(job *api.Item, style Style, clock Clock) string {
 	score := *job.Score
 	postUrl := fmt.Sprintf("%s%d", itemBaseUrl, job.Id)
 	title := *job.Title
@@ -40,7 +70,7 @@ func JobOutput(job *api.Item, style Style, clock Clock) string {
 	}
 }
 
-func StoryOutput(story *api.Item, style Style, clock Clock) string {
+func storyOutput(story *api.Item, style Style, clock Clock) string {
 	by := *story.By
 	score := *story.Score
 	comments := *story.Descendants
@@ -73,7 +103,7 @@ func StoryOutput(story *api.Item, style Style, clock Clock) string {
 	}
 }
 
-func PollOutput(poll *api.Item, style Style, clock Clock) string {
+func pollOutput(poll *api.Item, style Style, clock Clock) string {
 	by := *poll.By
 	score := *poll.Score
 	comments := *poll.Descendants
@@ -101,7 +131,7 @@ func PollOutput(poll *api.Item, style Style, clock Clock) string {
 	}
 }
 
-func PollOptOutput(pollopt *api.Item, style Style, clock Clock) string {
+func pollOptOutput(pollopt *api.Item, style Style, clock Clock) string {
 	by := *pollopt.By
 	postUrl := fmt.Sprintf("%s%d", itemBaseUrl, pollopt.Id)
 	byUrl := fmt.Sprintf("%s%s", userBaseUrl, by)
@@ -129,7 +159,7 @@ func PollOptOutput(pollopt *api.Item, style Style, clock Clock) string {
 	}
 }
 
-func CommentOutput(comment *api.Item, style Style, clock Clock) string {
+func commentOutput(comment *api.Item, style Style, clock Clock) string {
 	by := *comment.By
 	postUrl := fmt.Sprintf("%s%d", itemBaseUrl, comment.Id)
 	byUrl := fmt.Sprintf("%s%s", userBaseUrl, by)
