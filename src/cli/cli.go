@@ -128,7 +128,7 @@ func ArgsFromCli() (Args, error) {
 	case "markdown":
 		style = formatting.Markdown
 	default:
-		return Args{}, fmt.Errorf("invalid style: %s\n", style)
+		return Args{}, fmt.Errorf("invalid style: %s\n", stylestr)
 	}
 
 	return Args{
