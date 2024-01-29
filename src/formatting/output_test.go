@@ -1,7 +1,7 @@
 package formatting
 
 import (
-	"fmt"
+	"bytes"
 	"testing"
 	"time"
 
@@ -75,11 +75,13 @@ var (
 )
 
 func TestPlainOutput(t *testing.T) {
-	jobOutput := jobOutput(&job, Plain, &fakeClock)
-	storyOutput := storyOutput(&story, Plain, &fakeClock)
-	pollOutput := pollOutput(&poll, Plain, &fakeClock)
-	pollOptOutput := pollOptOutput(&pollopt, Plain, &fakeClock)
-	commentOutput := commentOutput(&comment, Plain, &fakeClock)
+	var jobOutput, storyOutput, pollOutput, pollOptOutput, commentOutput bytes.Buffer
+
+	writeJobItem(&job, Plain, &fakeClock, &jobOutput)
+	writeStoryItem(&story, Plain, &fakeClock, &storyOutput)
+	writePollItem(&poll, Plain, &fakeClock, &pollOutput)
+	writePollOptItem(&pollopt, Plain, &fakeClock, &pollOptOutput)
+	writeCommentItem(&comment, Plain, &fakeClock, &commentOutput)
 
 	expectedJobOutput := "HIRING: https://news.ycombinator.com/item?id=1\n└─── 1 pt 6 hours ago\n"
 	expectedStoryOutput := "www.story.url\n└─── 10 pts by storyuser 12 days ago | 20 comments\n"
@@ -87,19 +89,21 @@ func TestPlainOutput(t *testing.T) {
 	expectedpollOptOutput := "Poll option text\n└─── 1000 pts by polloptuser 3 months ago\n"
 	expectedcommentOutput := "Comment text\n└─── by commentuser a day ago | 4 replies\n"
 
-	assert.Equal(t, expectedJobOutput, jobOutput)
-	assert.Equal(t, expectedStoryOutput, storyOutput)
-	assert.Equal(t, expectedPollOutput, pollOutput)
-	assert.Equal(t, expectedpollOptOutput, pollOptOutput)
-	assert.Equal(t, expectedcommentOutput, commentOutput)
+	assert.Equal(t, expectedJobOutput, jobOutput.String())
+	assert.Equal(t, expectedStoryOutput, storyOutput.String())
+	assert.Equal(t, expectedPollOutput, pollOutput.String())
+	assert.Equal(t, expectedpollOptOutput, pollOptOutput.String())
+	assert.Equal(t, expectedcommentOutput, commentOutput.String())
 }
 
 func TestMarkdownOutput(t *testing.T) {
-	jobOutput := jobOutput(&job, Markdown, &fakeClock)
-	storyOutput := storyOutput(&story, Markdown, &fakeClock)
-	pollOutput := pollOutput(&poll, Markdown, &fakeClock)
-	pollOptOutput := pollOptOutput(&pollopt, Markdown, &fakeClock)
-	commentOutput := commentOutput(&comment, Markdown, &fakeClock)
+	var jobOutput, storyOutput, pollOutput, pollOptOutput, commentOutput bytes.Buffer
+
+	writeJobItem(&job, Markdown, &fakeClock, &jobOutput)
+	writeStoryItem(&story, Markdown, &fakeClock, &storyOutput)
+	writePollItem(&poll, Markdown, &fakeClock, &pollOutput)
+	writePollOptItem(&pollopt, Markdown, &fakeClock, &pollOptOutput)
+	writeCommentItem(&comment, Markdown, &fakeClock, &commentOutput)
 
 	expectedJobOutput := "* **[HIRING: Job title](https://news.ycombinator.com/item?id=1)**\n* └─── 1 pt 6 hours ago\n"
 	expectedStoryOutput := "* **[Story title](www.story.url)**\n* └─── 10 pts by [storyuser](https://news.ycombinator.com/user?id=storyuser) 12 days ago | [20 comments](https://news.ycombinator.com/item?id=2)\n"
@@ -107,15 +111,16 @@ func TestMarkdownOutput(t *testing.T) {
 	expectedpollOptOutput := "* **[Poll option text](https://news.ycombinator.com/item?id=4)**\n* └─── 1000 pts by [polloptuser](https://news.ycombinator.com/user?id=polloptuser) 3 months ago\n"
 	expectedcommentOutput := "* *[Comment text](https://news.ycombinator.com/item?id=5)*\n* └─── by [commentuser](https://news.ycombinator.com/user?id=commentuser) a day ago | [4 replies](https://news.ycombinator.com/item?id=5)\n"
 
-	assert.Equal(t, expectedJobOutput, jobOutput)
-	assert.Equal(t, expectedStoryOutput, storyOutput)
-	assert.Equal(t, expectedPollOutput, pollOutput)
-	assert.Equal(t, expectedpollOptOutput, pollOptOutput)
-	assert.Equal(t, expectedcommentOutput, commentOutput)
+	assert.Equal(t, expectedJobOutput, jobOutput.String())
+	assert.Equal(t, expectedStoryOutput, storyOutput.String())
+	assert.Equal(t, expectedPollOutput, pollOutput.String())
+	assert.Equal(t, expectedpollOptOutput, pollOptOutput.String())
+	assert.Equal(t, expectedcommentOutput, commentOutput.String())
 }
 
 func TestJsonOutput(t *testing.T) {
-	jsonOutput := DisplayJson([]api.Item{job, story, poll, pollopt, comment})
+	var jsonOutput bytes.Buffer
+	WriteJson([]api.Item{job, story, poll, pollopt, comment}, &jsonOutput)
 
 	expectedJsonOutput := `[
 	{
@@ -208,8 +213,9 @@ func TestJsonOutput(t *testing.T) {
 		"parts": null,
 		"descendants": null
 	}
-]`
-	assert.Equal(t, expectedJsonOutput, jsonOutput)
+]
+`
+	assert.Equal(t, expectedJsonOutput, jsonOutput.String())
 }
 
 func TestStoryWithoutUrlFallbackToPostUrl(t *testing.T) {
@@ -222,11 +228,12 @@ func TestStoryWithoutUrlFallbackToPostUrl(t *testing.T) {
 		Title:       ptr("Story title"),
 	}
 
-	storyOutput := storyOutput(&story, Plain, &fakeClock)
+	var storyOutput bytes.Buffer
+	writeStoryItem(&story, Plain, &fakeClock, &storyOutput)
 
 	expectedStoryOutput := "https://news.ycombinator.com/item?id=2\n└─── 10 pts by storyuser 12 days ago | 20 comments\n"
 
-	assert.Equal(t, expectedStoryOutput, storyOutput)
+	assert.Equal(t, expectedStoryOutput, storyOutput.String())
 }
 
 func TestSingularOutput(t *testing.T) {
@@ -240,14 +247,13 @@ func TestSingularOutput(t *testing.T) {
 	pollopt.Score = intptr(1)
 	comment.Kids = []api.ItemId{3}
 
-	fmt.Printf("story: %v\n", story)
-	fmt.Printf("story.Url: %v\n", story.Url)
+	var jobOutput, storyOutput, pollOutput, pollOptOutput, commentOutput bytes.Buffer
 
-	jobOutput := jobOutput(&job, Plain, &fakeClock)
-	storyOutput := storyOutput(&story, Plain, &fakeClock)
-	pollOutput := pollOutput(&poll, Plain, &fakeClock)
-	pollOptOutput := pollOptOutput(&pollopt, Plain, &fakeClock)
-	commentOutput := commentOutput(&comment, Plain, &fakeClock)
+	writeJobItem(&job, Plain, &fakeClock, &jobOutput)
+	writeStoryItem(&story, Plain, &fakeClock, &storyOutput)
+	writePollItem(&poll, Plain, &fakeClock, &pollOutput)
+	writePollOptItem(&pollopt, Plain, &fakeClock, &pollOptOutput)
+	writeCommentItem(&comment, Plain, &fakeClock, &commentOutput)
 
 	expectedJobOutput := "HIRING: https://news.ycombinator.com/item?id=1\n└─── 1 pt 6 hours ago\n"
 	expectedStoryOutput := "www.story.url\n└─── 1 pt by storyuser 12 days ago | 1 comment\n"
@@ -255,9 +261,9 @@ func TestSingularOutput(t *testing.T) {
 	expectedpollOptOutput := "Poll option text\n└─── 1 pt by polloptuser 3 months ago\n"
 	expectedcommentOutput := "Comment text\n└─── by commentuser a day ago | 1 reply\n"
 
-	assert.Equal(t, expectedJobOutput, jobOutput)
-	assert.Equal(t, expectedStoryOutput, storyOutput)
-	assert.Equal(t, expectedPollOutput, pollOutput)
-	assert.Equal(t, expectedpollOptOutput, pollOptOutput)
-	assert.Equal(t, expectedcommentOutput, commentOutput)
+	assert.Equal(t, expectedJobOutput, jobOutput.String())
+	assert.Equal(t, expectedStoryOutput, storyOutput.String())
+	assert.Equal(t, expectedPollOutput, pollOutput.String())
+	assert.Equal(t, expectedpollOptOutput, pollOptOutput.String())
+	assert.Equal(t, expectedcommentOutput, commentOutput.String())
 }

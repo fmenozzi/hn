@@ -3,7 +3,7 @@ package formatting
 import (
 	"encoding/json"
 	"fmt"
-	"strings"
+	"io"
 	"time"
 
 	"github.com/fmenozzi/hn/src/api"
@@ -22,49 +22,47 @@ const (
 	Json           = "json"
 )
 
-func DisplayPlain(items []api.Item, clock Clock) string {
-	return display(items, Plain, clock)
+func WritePlain(items []api.Item, clock Clock, w io.Writer) {
+	writeItems(items, Plain, clock, w)
 }
 
-func DisplayMarkdown(items []api.Item, clock Clock) string {
-	return display(items, Markdown, clock)
+func WriteMarkdown(items []api.Item, clock Clock, w io.Writer) {
+	writeItems(items, Markdown, clock, w)
 }
 
-func DisplayJson(items []api.Item) string {
+func WriteJson(items []api.Item, w io.Writer) {
 	// Note that we do not do any post-fetch formatting of output here: this is
 	// basically a one-to-one mapping of the Item data as fetched. For example,
 	// we do not fall back to post urls if the item does not have a url, and the
 	// time is represented as the original Unix timestamp instead of the human-
 	// readable relative time.
-	bytes, err := json.MarshalIndent(items, "", "\t")
-	if err != nil {
+	encoder := json.NewEncoder(w)
+	encoder.SetIndent("", "\t")
+	if err := encoder.Encode(items); err != nil {
 		panic(fmt.Sprintf("error formatting items as json: %s", err.Error()))
 	}
-	return string(bytes)
 }
 
-func display(items []api.Item, style Style, clock Clock) string {
-	var builder strings.Builder
+func writeItems(items []api.Item, style Style, clock Clock, w io.Writer) {
 	for _, item := range items {
 		switch item.Type {
 		case api.Job:
-			builder.WriteString(jobOutput(&item, style, clock))
+			writeJobItem(&item, style, clock, w)
 		case api.Story:
-			builder.WriteString(storyOutput(&item, style, clock))
+			writeStoryItem(&item, style, clock, w)
 		case api.Poll:
-			builder.WriteString(pollOutput(&item, style, clock))
+			writePollItem(&item, style, clock, w)
 		case api.PollOpt:
-			builder.WriteString(pollOptOutput(&item, style, clock))
+			writePollOptItem(&item, style, clock, w)
 		case api.Comment:
-			builder.WriteString(commentOutput(&item, style, clock))
+			writeCommentItem(&item, style, clock, w)
 		default:
 			panic(fmt.Sprintf("invalid item type %s", item.Type))
 		}
 	}
-	return builder.String()
 }
 
-func jobOutput(job *api.Item, style Style, clock Clock) string {
+func writeJobItem(job *api.Item, style Style, clock Clock, w io.Writer) {
 	score := *job.Score
 	postUrl := fmt.Sprintf("%s%d", itemBaseUrl, job.Id)
 	title := *job.Title
@@ -77,15 +75,15 @@ func jobOutput(job *api.Item, style Style, clock Clock) string {
 
 	switch style {
 	case Plain:
-		return fmt.Sprintf("HIRING: %s\n└─── %d %s %s\n", postUrl, score, ptsstr, time)
+		fmt.Fprintf(w, "HIRING: %s\n└─── %d %s %s\n", postUrl, score, ptsstr, time)
 	case Markdown:
-		return fmt.Sprintf("* **[HIRING: %s](%s)**\n* └─── %d %s %s\n", title, postUrl, score, ptsstr, time)
+		fmt.Fprintf(w, "* **[HIRING: %s](%s)**\n* └─── %d %s %s\n", title, postUrl, score, ptsstr, time)
 	default:
 		panic(fmt.Sprintf("invalid style: %s\n", style))
 	}
 }
 
-func storyOutput(story *api.Item, style Style, clock Clock) string {
+func writeStoryItem(story *api.Item, style Style, clock Clock, w io.Writer) {
 	by := *story.By
 	score := *story.Score
 	comments := *story.Descendants
@@ -110,15 +108,15 @@ func storyOutput(story *api.Item, style Style, clock Clock) string {
 
 	switch style {
 	case Plain:
-		return fmt.Sprintf("%s\n└─── %d %s by %s %s | %d %s\n", url, score, ptsstr, by, time, comments, commentsstr)
+		fmt.Fprintf(w, "%s\n└─── %d %s by %s %s | %d %s\n", url, score, ptsstr, by, time, comments, commentsstr)
 	case Markdown:
-		return fmt.Sprintf("* **[%s](%s)**\n* └─── %d %s by [%s](%s) %s | [%d %s](%s)\n", title, url, score, ptsstr, by, byUrl, time, comments, commentsstr, postUrl)
+		fmt.Fprintf(w, "* **[%s](%s)**\n* └─── %d %s by [%s](%s) %s | [%d %s](%s)\n", title, url, score, ptsstr, by, byUrl, time, comments, commentsstr, postUrl)
 	default:
 		panic(fmt.Sprintf("invalid style: %s\n", style))
 	}
 }
 
-func pollOutput(poll *api.Item, style Style, clock Clock) string {
+func writePollItem(poll *api.Item, style Style, clock Clock, w io.Writer) {
 	by := *poll.By
 	score := *poll.Score
 	comments := *poll.Descendants
@@ -138,15 +136,15 @@ func pollOutput(poll *api.Item, style Style, clock Clock) string {
 
 	switch style {
 	case Plain:
-		return fmt.Sprintf("%s\n└─── %d %s by %s %s | %d %s\n", postUrl, score, ptsstr, by, time, comments, commentsstr)
+		fmt.Fprintf(w, "%s\n└─── %d %s by %s %s | %d %s\n", postUrl, score, ptsstr, by, time, comments, commentsstr)
 	case Markdown:
-		return fmt.Sprintf("* **[%s](%s)**\n* └─── %d %s by [%s](%s) %s | [%d %s](%s)\n", title, postUrl, score, ptsstr, by, byUrl, time, comments, commentsstr, postUrl)
+		fmt.Fprintf(w, "* **[%s](%s)**\n* └─── %d %s by [%s](%s) %s | [%d %s](%s)\n", title, postUrl, score, ptsstr, by, byUrl, time, comments, commentsstr, postUrl)
 	default:
 		panic(fmt.Sprintf("invalid style: %s\n", style))
 	}
 }
 
-func pollOptOutput(pollopt *api.Item, style Style, clock Clock) string {
+func writePollOptItem(pollopt *api.Item, style Style, clock Clock, w io.Writer) {
 	by := *pollopt.By
 	postUrl := fmt.Sprintf("%s%d", itemBaseUrl, pollopt.Id)
 	byUrl := fmt.Sprintf("%s%s", userBaseUrl, by)
@@ -166,15 +164,15 @@ func pollOptOutput(pollopt *api.Item, style Style, clock Clock) string {
 
 	switch style {
 	case Plain:
-		return fmt.Sprintf("%s\n└─── %d %s by %s %s\n", text, score, ptsstr, by, time)
+		fmt.Fprintf(w, "%s\n└─── %d %s by %s %s\n", text, score, ptsstr, by, time)
 	case Markdown:
-		return fmt.Sprintf("* **[%s](%s)**\n* └─── %d %s by [%s](%s) %s\n", text, postUrl, score, ptsstr, by, byUrl, time)
+		fmt.Fprintf(w, "* **[%s](%s)**\n* └─── %d %s by [%s](%s) %s\n", text, postUrl, score, ptsstr, by, byUrl, time)
 	default:
 		panic(fmt.Sprintf("invalid style: %s\n", style))
 	}
 }
 
-func commentOutput(comment *api.Item, style Style, clock Clock) string {
+func writeCommentItem(comment *api.Item, style Style, clock Clock, w io.Writer) {
 	by := *comment.By
 	postUrl := fmt.Sprintf("%s%d", itemBaseUrl, comment.Id)
 	byUrl := fmt.Sprintf("%s%s", userBaseUrl, by)
@@ -194,9 +192,9 @@ func commentOutput(comment *api.Item, style Style, clock Clock) string {
 
 	switch style {
 	case Plain:
-		return fmt.Sprintf("%s\n└─── by %s %s | %d %s\n", text, by, time, comments, repliesstr)
+		fmt.Fprintf(w, "%s\n└─── by %s %s | %d %s\n", text, by, time, comments, repliesstr)
 	case Markdown:
-		return fmt.Sprintf("* *[%s](%s)*\n* └─── by [%s](%s) %s | [%d %s](%s)\n", text, postUrl, by, byUrl, time, comments, repliesstr, postUrl)
+		fmt.Fprintf(w, "* *[%s](%s)*\n* └─── by [%s](%s) %s | [%d %s](%s)\n", text, postUrl, by, byUrl, time, comments, repliesstr, postUrl)
 	default:
 		panic(fmt.Sprintf("invalid style: %s\n", style))
 	}

@@ -43,11 +43,11 @@ func DisplayItems(items []api.Item, style formatting.Style) {
 	var clock formatting.RealClock
 	switch style {
 	case formatting.Plain:
-		fmt.Print(formatting.DisplayPlain(items, &clock))
+		formatting.WritePlain(items, &clock, os.Stdout)
 	case formatting.Markdown:
-		fmt.Print(formatting.DisplayMarkdown(items, &clock))
+		formatting.WriteMarkdown(items, &clock, os.Stdout)
 	case formatting.Json:
-		fmt.Print(formatting.DisplayJson(items))
+		formatting.WriteJson(items, os.Stdout)
 	default:
 		panic(fmt.Sprintf("invalid style: %s\n", style))
 	}
