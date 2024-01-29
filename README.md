@@ -33,10 +33,10 @@ Options:
     -h, --help      show this help message and exit
     -v, --version   show program version information and exit
     -l, --limit     max number of results to fetch (default: 30)
-    -s, --style     output style, one of plain|markdown|md|json (default: plain)
+    -s, --style     output style, one of plain, markdown, md, json (default: plain)
     -r, --ranking   ranking method
-                    top|new|best for front page items (default: top)
-                    date|popularity for search result items (default: popularity)
+                        one of top, new, best for front page items (default: top)
+                        one of date, popularity for search result items (default: popularity)
     -q, --query     search query
     -t, --tags      filter search results on specific tags (default: story)
 
