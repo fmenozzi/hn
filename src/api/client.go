@@ -85,7 +85,7 @@ func (hn *HnClient) FetchFrontPageItemIds(ranking FrontPageItemsRanking, limit i
 	}
 	defer response.Body.Close()
 	if response.StatusCode > 299 {
-		return nil, fmt.Errorf("response failed with code %d\n", response.StatusCode)
+		return nil, fmt.Errorf("front page request failed with code %d\n", response.StatusCode)
 	}
 
 	var ids []ItemId
@@ -106,7 +106,7 @@ func (hn *HnClient) FetchItem(id ItemId) (*Item, error) {
 	}
 	defer response.Body.Close()
 	if response.StatusCode > 299 {
-		return nil, fmt.Errorf("response failed with code %d\n", response.StatusCode)
+		return nil, fmt.Errorf("item fetch request failed with code %d\n", response.StatusCode)
 	}
 
 	var item Item
@@ -175,7 +175,7 @@ func (hn *HnClient) Search(request SearchRequest) (*SearchResponse, error) {
 	}
 	defer response.Body.Close()
 	if response.StatusCode > 299 {
-		return nil, fmt.Errorf("response failed with code %d\n", response.StatusCode)
+		return nil, fmt.Errorf("search request failed with code %d\n", response.StatusCode)
 	}
 
 	var searchResponse SearchResponseJson
