@@ -99,7 +99,7 @@ func TestFetchFrontPageItemIdsFailsIfJsonCannotBeParsed(t *testing.T) {
 	_, err := client.FetchFrontPageItemIds(Top, 10)
 
 	assert.NotNil(t, err)
-	assert.ErrorContains(t, err, "unexpected end of JSON input")
+	assert.ErrorContains(t, err, "unexpected EOF")
 }
 
 func TestFetchItemSucceedsIfServerReturns200(t *testing.T) {
@@ -146,7 +146,7 @@ func TestFetchItemFailsIfJsonCannotBeParsed(t *testing.T) {
 	_, err := client.FetchItem(123)
 
 	assert.NotNil(t, err)
-	assert.ErrorContains(t, err, "unexpected end of JSON input")
+	assert.ErrorContains(t, err, "unexpected EOF")
 }
 
 func TestFetchItemsSucceedsIfServerReturns200(t *testing.T) {
@@ -196,7 +196,7 @@ func TestFetchItemsFailsIfJsonCannotBeParsed(t *testing.T) {
 	_, err := client.FetchItems([]ItemId{123})
 
 	assert.NotNil(t, err)
-	assert.ErrorContains(t, err, "unexpected end of JSON input")
+	assert.ErrorContains(t, err, "unexpected EOF")
 }
 
 func TestSearchSucceedsIfServerReturns200(t *testing.T) {
@@ -376,5 +376,5 @@ func TestSearchFailsIfJsonCannotBeParsed(t *testing.T) {
 	})
 
 	assert.NotNil(t, err)
-	assert.ErrorContains(t, err, "unexpected end of JSON input")
+	assert.ErrorContains(t, err, "unexpected EOF")
 }

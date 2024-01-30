@@ -3,7 +3,6 @@ package api
 import (
 	"encoding/json"
 	"fmt"
-	"io"
 	"net/http"
 	"net/url"
 	"strconv"
@@ -88,13 +87,9 @@ func (hn *HnClient) FetchFrontPageItemIds(ranking FrontPageItemsRanking, limit i
 	if response.StatusCode > 299 {
 		return nil, fmt.Errorf("response failed with code %d\n", response.StatusCode)
 	}
-	body, err := io.ReadAll(response.Body)
-	if err != nil {
-		return nil, err
-	}
 
 	var ids []ItemId
-	if err := json.Unmarshal(body, &ids); err != nil {
+	if err := json.NewDecoder(response.Body).Decode(&ids); err != nil {
 		return nil, err
 	}
 
@@ -113,13 +108,9 @@ func (hn *HnClient) FetchItem(id ItemId) (*Item, error) {
 	if response.StatusCode > 299 {
 		return nil, fmt.Errorf("response failed with code %d\n", response.StatusCode)
 	}
-	body, err := io.ReadAll(response.Body)
-	if err != nil {
-		return nil, err
-	}
 
 	var item Item
-	if err := json.Unmarshal(body, &item); err != nil {
+	if err := json.NewDecoder(response.Body).Decode(&item); err != nil {
 		return nil, err
 	}
 
@@ -186,13 +177,9 @@ func (hn *HnClient) Search(request SearchRequest) (*SearchResponse, error) {
 	if response.StatusCode > 299 {
 		return nil, fmt.Errorf("response failed with code %d\n", response.StatusCode)
 	}
-	body, err := io.ReadAll(response.Body)
-	if err != nil {
-		return nil, err
-	}
 
 	var searchResponse SearchResponseJson
-	if err := json.Unmarshal(body, &searchResponse); err != nil {
+	if err := json.NewDecoder(response.Body).Decode(&searchResponse); err != nil {
 		return nil, err
 	}
 
