@@ -223,13 +223,12 @@ func TestCsvOutput(t *testing.T) {
 	WriteCsv([]api.Item{job, story, poll, pollopt, comment}, &csvOutput)
 
 	expectedCsvOutput :=
-		`1,job,jobuser,9978400,Job title,https://news.ycombinator.com/item?id=1,1,0
-2,story,storyuser,8963200,Story title,www.story.url,10,20
-3,poll,polluser,9997600,Poll title,https://news.ycombinator.com/item?id=3,100,200
-4,pollopt,polloptuser,2224000,Poll option text,https://news.ycombinator.com/item?id=4,1000,0
-5,comment,commentuser,9913600,Comment text,https://news.ycombinator.com/item?id=5,0,4
+		`1,,job,jobuser,9978400,,,0,0,,,1,Job title,,0
+2,,story,storyuser,8963200,,,0,0,,www.story.url,10,Story title,,20
+3,,poll,polluser,9997600,,,0,0,,,100,Poll title,,200
+4,,pollopt,polloptuser,2224000,Poll option text,,0,0,,,1000,,,0
+5,,comment,commentuser,9913600,Comment text,,0,0,"6,7,8,9",,0,,,0
 `
-
 	assert.Equal(t, expectedCsvOutput, csvOutput.String())
 }
 

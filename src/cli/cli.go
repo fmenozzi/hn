@@ -24,7 +24,11 @@ Options:
     -t, --tags      filter search results on specific tags (default: story)
 
 Notes:
-    The csv output columns are id,type,by,timestamp,title,url,score,comments
+    The csv output columns (and json field names) are:
+
+    id,deleted,type,by,time,text,dead,parent,poll,kids,url,score,title,parts,descendents
+
+    See https://github.com/HackerNews/API for schema details.
 
     Search tags are ANDed by default but can be ORed if between parentheses. For
     example, "author_pg,(story,poll)" filters on "author_pg AND (type=story OR type=poll)".

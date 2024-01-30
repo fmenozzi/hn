@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/fmenozzi/hn/src/api"
@@ -47,37 +48,26 @@ func WriteJson(items []api.Item, w io.Writer) {
 }
 
 func WriteCsv(items []api.Item, w io.Writer) {
+	// Similar to `WriteJson`, this is a "raw" fetch of data without any
+	// additional post-processing.
 	records := make([][]string, len(items))
 	for i, item := range items {
-		title := ""
-		if item.Title != nil {
-			title = *item.Title
-		} else if item.Text != nil {
-			title = *item.Text
-		}
-		url := fmt.Sprintf("%s%d", itemBaseUrl, item.Id)
-		if item.Url != nil {
-			url = *item.Url
-		}
-		score := int32(0)
-		if item.Score != nil {
-			score = *item.Score
-		}
-		comments := int32(0)
-		if item.Descendants != nil {
-			comments = *item.Descendants
-		} else if item.Kids != nil {
-			comments = int32(len(item.Kids))
-		}
 		records[i] = []string{
-			strconv.FormatInt(int64(item.Id), 10),
+			intToStr(item.Id),
+			derefBoolOrEmptyStr(item.Deleted),
 			string(item.Type),
-			*item.By,
-			strconv.FormatInt(*item.Time, 10),
-			title,
-			url,
-			strconv.FormatInt(int64(score), 10),
-			strconv.FormatInt(int64(comments), 10),
+			derefStrOr(item.By, ""),
+			derefIntOr(item.Time, 0),
+			derefStrOr(item.Text, ""),
+			derefBoolOrEmptyStr(item.Dead),
+			derefIntOr(item.Parent, 0),
+			derefIntOr(item.Poll, 0),
+			idsToStr(item.Kids),
+			derefStrOr(item.Url, ""),
+			derefIntOr(item.Score, 0),
+			derefStrOr(item.Title, ""),
+			idsToStr(item.Parts),
+			derefIntOr(item.Descendants, 0),
 		}
 	}
 	csvWriter := csv.NewWriter(w)
@@ -241,4 +231,41 @@ func writeCommentItem(comment *api.Item, style Style, clock Clock, w io.Writer) 
 	default:
 		panic(fmt.Sprintf("invalid style: %s\n", style))
 	}
+}
+
+func derefStrOr(ptr *string, or string) string {
+	if ptr != nil {
+		return *ptr
+	}
+	return or
+}
+
+func derefIntOr[Int int32 | int64](ptr *Int, or Int) string {
+	i := or
+	if ptr != nil {
+		i = *ptr
+	}
+	return intToStr(i)
+}
+
+func derefBoolOrEmptyStr(ptr *bool) string {
+	if ptr != nil {
+		return strconv.FormatBool(*ptr)
+	}
+	return ""
+}
+
+func intToStr[Int int | int32 | int64](i Int) string {
+	return strconv.FormatInt(int64(i), 10)
+}
+
+func idsToStr(ids []api.ItemId) string {
+	if ids == nil {
+		return ""
+	}
+	strids := make([]string, len(ids))
+	for i := range ids {
+		strids[i] = strconv.Itoa(int(ids[i]))
+	}
+	return strings.Join(strids, ",")
 }

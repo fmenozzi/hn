@@ -3,10 +3,10 @@ A simple commandline hacker news client.
 Features:
 * Browse the front page anonymously (i.e. no login) and sort by new, hot, best
 * Search for stories via the Algolia API and sort by date, popularity
-* Format output for terminal markdown viewing (via e.g. [`mdcat`](https://github.com/swsnr/mdcat))
+* Format output for plain or terminal markdown viewing (via e.g. [`mdcat`](https://github.com/swsnr/mdcat))
     * Markdown via `mdcat` et al only possible on supported terminals (e.g. [`kitty`](https://sw.kovidgoyal.net/kitty/), [`iTerm2`](https://iterm2.com/))
-* Format output in json for scripting
-    * See [here](https://github.com/HackerNews/API) for API details
+* Format output in json or csv for scripting
+    * See [here](https://github.com/HackerNews/API) for details on the `Item` schema
 
 Examples:
 * Get top 30 stories on the front page:
@@ -41,7 +41,11 @@ Options:
     -t, --tags      filter search results on specific tags (default: story)
 
 Notes:
-    The csv output columns are id,type,by,timestamp,title,url,score,comments
+    The csv output columns (and json field names) are:
+
+    id,deleted,type,by,time,text,dead,parent,poll,kids,url,score,title,parts,descendents
+
+    See https://github.com/HackerNews/API for schema details.
 
     Search tags are ANDed by default but can be ORed if between parentheses. For
     example, "author_pg,(story,poll)" filters on "author_pg AND (type=story OR type=poll)".
