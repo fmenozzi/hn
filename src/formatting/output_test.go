@@ -218,6 +218,21 @@ func TestJsonOutput(t *testing.T) {
 	assert.Equal(t, expectedJsonOutput, jsonOutput.String())
 }
 
+func TestCsvOutput(t *testing.T) {
+	var csvOutput bytes.Buffer
+	WriteCsv([]api.Item{job, story, poll, pollopt, comment}, &csvOutput)
+
+	expectedCsvOutput :=
+		`1,job,jobuser,9978400,Job title,https://news.ycombinator.com/item?id=1,1,0
+2,story,storyuser,8963200,Story title,www.story.url,10,20
+3,poll,polluser,9997600,Poll title,https://news.ycombinator.com/item?id=3,100,200
+4,pollopt,polloptuser,2224000,Poll option text,https://news.ycombinator.com/item?id=4,1000,0
+5,comment,commentuser,9913600,Comment text,https://news.ycombinator.com/item?id=5,0,4
+`
+
+	assert.Equal(t, expectedCsvOutput, csvOutput.String())
+}
+
 func TestStoryWithoutUrlFallbackToPostUrl(t *testing.T) {
 	story := api.Item{
 		Id:          2,

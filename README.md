@@ -33,7 +33,7 @@ Options:
     -h, --help      show this help message and exit
     -v, --version   show program version information and exit
     -l, --limit     max number of results to fetch (default: 30)
-    -s, --style     output style, one of plain, markdown, md, json (default: plain)
+    -s, --style     output style, one of plain, markdown, md, json, csv (default: plain)
     -r, --ranking   ranking method
                         one of top, new, best for front page items (default: top)
                         one of date, popularity for search result items (default: popularity)
@@ -41,6 +41,8 @@ Options:
     -t, --tags      filter search results on specific tags (default: story)
 
 Notes:
+    The csv output columns are id,type,by,timestamp,title,url,score,comments
+
     Search tags are ANDed by default but can be ORed if between parentheses. For
     example, "author_pg,(story,poll)" filters on "author_pg AND (type=story OR type=poll)".
     See https://hn.algolia.com/api for more.

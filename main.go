@@ -48,6 +48,8 @@ func DisplayItems(items []api.Item, style formatting.Style) {
 		formatting.WriteMarkdown(items, &clock, os.Stdout)
 	case formatting.Json:
 		formatting.WriteJson(items, os.Stdout)
+	case formatting.Csv:
+		formatting.WriteCsv(items, os.Stdout)
 	default:
 		panic(fmt.Sprintf("invalid style: %s\n", style))
 	}

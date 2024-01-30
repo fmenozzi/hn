@@ -1,9 +1,11 @@
 package formatting
 
 import (
+	"encoding/csv"
 	"encoding/json"
 	"fmt"
 	"io"
+	"strconv"
 	"time"
 
 	"github.com/fmenozzi/hn/src/api"
@@ -20,6 +22,7 @@ const (
 	Plain    Style = "plain"
 	Markdown       = "markdown"
 	Json           = "json"
+	Csv            = "csv"
 )
 
 func WritePlain(items []api.Item, clock Clock, w io.Writer) {
@@ -40,6 +43,46 @@ func WriteJson(items []api.Item, w io.Writer) {
 	encoder.SetIndent("", "\t")
 	if err := encoder.Encode(items); err != nil {
 		panic(fmt.Sprintf("error formatting items as json: %s", err.Error()))
+	}
+}
+
+func WriteCsv(items []api.Item, w io.Writer) {
+	records := make([][]string, len(items))
+	for i, item := range items {
+		title := ""
+		if item.Title != nil {
+			title = *item.Title
+		} else if item.Text != nil {
+			title = *item.Text
+		}
+		url := fmt.Sprintf("%s%d", itemBaseUrl, item.Id)
+		if item.Url != nil {
+			url = *item.Url
+		}
+		score := int32(0)
+		if item.Score != nil {
+			score = *item.Score
+		}
+		comments := int32(0)
+		if item.Descendants != nil {
+			comments = *item.Descendants
+		} else if item.Kids != nil {
+			comments = int32(len(item.Kids))
+		}
+		records[i] = []string{
+			strconv.FormatInt(int64(item.Id), 10),
+			string(item.Type),
+			*item.By,
+			strconv.FormatInt(*item.Time, 10),
+			title,
+			url,
+			strconv.FormatInt(int64(score), 10),
+			strconv.FormatInt(int64(comments), 10),
+		}
+	}
+	csvWriter := csv.NewWriter(w)
+	if err := csvWriter.WriteAll(records); err != nil {
+		panic(fmt.Sprintf("error formatting items as csv: %s", err.Error()))
 	}
 }
 
